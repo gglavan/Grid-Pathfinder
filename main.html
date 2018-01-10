@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>APA Algorithm</title>
+        <link type="text/css" rel="stylesheet" href="./css/style.css">
+        <link type="text/css" rel="stylesheet" href="./node_modules/materialize-css/dist/css/materialize.min.css"  media="screen,projection"/>
+        <link type="text/css" rel="stylesheet" href="./node_modules/material-design-icons/iconfont/material-icons.css">
+    </head>
+    <body>
+        <div id="grid"></div>
+        <section id="menu">
+            <ul style="margin-left:15px;">
+                <li>
+                    <input type="radio" id="start" name="selector" checked >
+                    <label for="start">Start</label>
+                </li>
+                <li>
+                    <input type="radio" id="stop" name="selector">
+                    <label for="stop">Finish</label>
+                </li>
+                <li>
+                    <input type="radio" id="obst" name="selector">
+                    <label for="obst">Obstacles</label>
+                </li>
+            </ul>
+            <div class="delimiter"></div>
+            <ul>
+                <li>
+                    <input type="radio" id="aStar" name="method" checked >
+                    <label for="aStar">A* (Star)</label>
+                </li>
+                <li>
+                    <input type="radio" id="Dijkstra" name="method">
+                    <label for="Dijkstra">Dijkstra</label>
+                </li>
+            </ul>
+            <a class="waves-effect waves-light btn" id="generatePathBtn">START</a>
+            <div class="fixed-action-btn horizontal valign-wrapper">
+                <p class="btn-floating waves-effect waves-light" style="margin-right:10px;">
+                    <i class="large material-icons">menu</i>
+                </p>
+                <ul>
+                    <li>
+                        <a class="btn-floating red btn tooltipped waves-effect waves-light" id="clearGrid" data-position="top" data-delay="500" data-tooltip="Clear the grid">
+                            <i class="material-icons">block</i>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="btn-floating yellow darken-1 btn tooltipped waves-effect waves-light" id="addObstacles" data-position="top" data-delay="500" data-tooltip="Add obstacles">
+                            <i class="material-icons">add_circle_outline</i>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="btn-floating green btn tooltipped waves-effect waves-light" id="saveGrid" data-position="top" data-delay="500" data-tooltip="Save the grid">
+                            <i class="material-icons">save</i>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="btn-floating blue btn tooltipped waves-effect waves-light" id="getFile" data-position="top" data-delay="500" data-tooltip="Open a file">
+                            <i class="material-icons">folder</i>
+                        </a>
+                    </li>
+                </ul>
+              </div>
+              <input type="file" id="myFile" style="display:none;">
+        </section>
+        <script type="text/javascript" src="./node_modules/jquery/dist/jquery.min.js"></script>
+        <script type="text/javascript" src="./dist/bundle.js"></script>
+        <script type="text/javascript" src="./node_modules/materialize-css/dist/js/materialize.min.js"></script>
+    </body>
+</html>
