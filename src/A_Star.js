@@ -38,6 +38,7 @@ export function aStar(start, goal) {
                 }
                 int = setInterval(drawPath, 5);
                 console.log(lastPath);
+                console.log("WTF")
                 return;
             }
 
