@@ -7,10 +7,9 @@ import {readFile, saveGrid} from './File'
 
 global.grid = [[]];
 global.lastPath = [];
+global.drawOrder = [];
 global.h = 0;
 global.w = 0;
-global.pos = undefined;
-global.int = undefined;
 global.lastStart = undefined; 
 global.lastStop = undefined;
 global.start = undefined;

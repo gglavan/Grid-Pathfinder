@@ -1,32 +1,51 @@
-export function drawPath() {
-	if(pos == undefined) pos = lastPath.length - 1;
-	if(pos >= 0){
-		lastPath[pos].el.style.backgroundColor = "#CEEBFB";
-		lastPath[pos].el.style.border = "0";
-		pos--;
-	} else {
-		clearInterval(int);
-		pos = undefined;
-	}
+export const Color = {
+	openNode: "rgb(224, 242, 241)",
+	closedNode: "rgb(128, 203, 196)",
+	path: "rgb(179, 229, 252)",
+	obstacle: "rgb(128, 128, 128)",
+	start: "rgb(147, 202, 59)",
+	goal: "rgb(235, 73, 96)",
+	clearNode: "rgb(255, 255, 255)",
+	nodeBorder: "1px solid rgb(230, 230, 230)"
 }
+
+// Draw path
+export async function drawPath (drawOrder, lastPath) {
+    if (lastPath.length) {
+        for(let i = 1, len = drawOrder.length - 2; i < len; i++) {
+            grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor = drawOrder[i].opened ? Color.closedNode : Color.openNode;
+            await sleep(5);
+        }
+        for(let i = lastPath.length - 1; i >= 0; i--) {
+            lastPath[i].el.style.backgroundColor = Color.path;
+		    lastPath[i].el.style.border = "none";
+            await sleep(5);
+        }
+    }
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 //Set obstacles
 export function setObstacles() {
-	const obst = 1500;
+	const obst = 1000;
 	let arr = [];
 	let i = 0;
-	for(let i = 0; i < h; i++) {
-		for(let j = 0; j < w; j++) {
+	for (let i = 0; i < h; i++) {
+		for (let j = 0; j < w; j++) {
 			grid[i][j].obstacle = false;
-			grid[i][j].el.style.backgroundColor = "white";
-			grid[i][j].el.style.border = "1px solid #E6E6E6";
+			grid[i][j].el.style.backgroundColor = Color.clearNode;
+			grid[i][j].el.style.border = Color.nodeBorder;
 			arr.push(grid[i][j]);
 		}
 	}
-	while(i < obst) {
+	while (i < obst) {
 		let rand = Math.floor(Math.random(arr.length) * arr.length);
 		arr[rand].obstacle = true;
-		arr[rand].el.style.backgroundColor = "#808080";
-		arr[rand].el.style.border = "0";
+		arr[rand].el.style.backgroundColor = Color.obstacle;
+		arr[rand].el.style.border = "none";
 		arr.splice(rand, 1);
 		i++;
 	}
@@ -34,8 +53,8 @@ export function setObstacles() {
 //Check if the obstacle is on path
 export function isOnPath(curr) {
 	let isOn = false;
-	lastPath.forEach((cell) => {
-		if(cell.x == curr.x && cell.y == curr.y) {
+	lastPath.forEach(cell => {
+		if (cell.x == curr.x && cell.y == curr.y) {
 			isOn = true; 
 			return isOn;
 		}

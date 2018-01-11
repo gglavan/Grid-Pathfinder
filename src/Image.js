@@ -21,7 +21,6 @@ function draw(img) {
     let a = [];
     let b = [];
     let l = 0;
-
         for(let i = 0; i < data.length; i += 4) {
             a.push({"r" : data[i], "g" : data[i + 1], "b" : data[i + 2], "a" : data[i + 3]});
             l++;

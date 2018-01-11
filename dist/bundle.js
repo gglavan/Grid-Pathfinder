@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 3);
+/******/ 	return __webpack_require__(__webpack_require__.s = 4);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -77,27 +77,29 @@ class Cell {
 		this.f = 0;
 		this.distance = Number.MAX_VALUE;
 		this.obstacle = false;
-		this.visited = false;
+		this.opened = false;
 		this.el = el;
 		this.parent;
 	}
 	heuristic(goal) {
 		const dx = Math.abs(this.x - goal.x);
 		const dy = Math.abs(this.y - goal.y);
-		return 5 * (dx + dy);
-		// const dx2 = start.x - goal.x
-		// const dy2 = start.y - goal.y
-		// const cross = Math.abs(dx*dy2 - dx2*dy)
-		// return 5 * (dx + dy) + cross * 0.001;
+		// return dx + dy;
+		const dx2 = start.x - goal.x
+		const dy2 = start.y - goal.y
+		const cross = Math.abs(dx*dy2 - dx2*dy)
+		return (dx + dy) + cross * 0.001;
 		// return 5 * (dx + dy) + (7 - 2 * 5) * Math.min(dx, dy);
-		
 	}
 }
-/* harmony export (immutable) */ __webpack_exports__["b"] = Cell;
+/* harmony export (immutable) */ __webpack_exports__["c"] = Cell;
 
 
 const cellSize = 20;
-/* harmony export (immutable) */ __webpack_exports__["a"] = cellSize;
+/* harmony export (immutable) */ __webpack_exports__["b"] = cellSize;
+
+const STRAIGHT_COST = 1;
+/* harmony export (immutable) */ __webpack_exports__["a"] = STRAIGHT_COST;
 
 
 /***/ }),
@@ -105,47 +107,68 @@ const cellSize = 20;
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (immutable) */ __webpack_exports__["b"] = drawPath;
-/* harmony export (immutable) */ __webpack_exports__["d"] = setObstacles;
-/* harmony export (immutable) */ __webpack_exports__["c"] = isOnPath;
-function drawPath() {
-	if(pos == undefined) pos = lastPath.length - 1;
-	if(pos >= 0){
-		lastPath[pos].el.style.backgroundColor = "#CEEBFB";
-		lastPath[pos].el.style.border = "0";
-		pos--;
-	} else {
-		clearInterval(int);
-		pos = undefined;
-	}
+/* harmony export (immutable) */ __webpack_exports__["c"] = drawPath;
+/* harmony export (immutable) */ __webpack_exports__["e"] = setObstacles;
+/* harmony export (immutable) */ __webpack_exports__["d"] = isOnPath;
+const Color = {
+	openNode: "rgb(224, 242, 241)",
+	closedNode: "rgb(128, 203, 196)",
+	path: "rgb(179, 229, 252)",
+	obstacle: "rgb(128, 128, 128)",
+	start: "rgb(147, 202, 59)",
+	goal: "rgb(235, 73, 96)",
+	clearNode: "rgb(255, 255, 255)",
+	nodeBorder: "1px solid rgb(230, 230, 230)"
 }
+/* harmony export (immutable) */ __webpack_exports__["b"] = Color;
+
+
+// Draw path
+async function drawPath (drawOrder, lastPath) {
+    if (lastPath.length) {
+        for(let i = 1, len = drawOrder.length - 2; i < len; i++) {
+            grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor = drawOrder[i].opened ? Color.closedNode : Color.openNode;
+            await sleep(5);
+        }
+        for(let i = lastPath.length - 1; i >= 0; i--) {
+            lastPath[i].el.style.backgroundColor = Color.path;
+		    lastPath[i].el.style.border = "none";
+            await sleep(5);
+        }
+    }
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 //Set obstacles
 function setObstacles() {
-	const obst = 1500;
+	const obst = 1000;
 	let arr = [];
 	let i = 0;
-	for(let i = 0; i < h; i++) {
-		for(let j = 0; j < w; j++) {
+	for (let i = 0; i < h; i++) {
+		for (let j = 0; j < w; j++) {
 			grid[i][j].obstacle = false;
-			grid[i][j].el.style.backgroundColor = "white";
-			grid[i][j].el.style.border = "1px solid #E6E6E6";
+			grid[i][j].el.style.backgroundColor = Color.clearNode;
+			grid[i][j].el.style.border = Color.nodeBorder;
 			arr.push(grid[i][j]);
 		}
 	}
-	while(i < obst) {
+	while (i < obst) {
 		let rand = Math.floor(Math.random(arr.length) * arr.length);
 		arr[rand].obstacle = true;
-		arr[rand].el.style.backgroundColor = "#808080";
-		arr[rand].el.style.border = "0";
-		arr.splice(rand,1);
+		arr[rand].el.style.backgroundColor = Color.obstacle;
+		arr[rand].el.style.border = "none";
+		arr.splice(rand, 1);
 		i++;
 	}
 }
 //Check if the obstacle is on path
 function isOnPath(curr) {
 	let isOn = false;
-	lastPath.forEach((cell) => {
-		if(cell.x == curr.x && cell.y == curr.y) {
+	lastPath.forEach(cell => {
+		if (cell.x == curr.x && cell.y == curr.y) {
 			isOn = true; 
 			return isOn;
 		}
@@ -172,18 +195,20 @@ const Alert = {
 /* harmony export (immutable) */ __webpack_exports__["c"] = resetPath;
 /* harmony export (immutable) */ __webpack_exports__["a"] = clearGrid;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Cell__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Draw__ = __webpack_require__(1);
 
 
 
-function adjustSize() {
+
+function adjustSize () {
 	const exc = document.getElementById("menu").clientHeight;
 	const gridZone = document.getElementById("grid");
 	let hgt = document.body.clientHeight - exc;
-	hgt -=	hgt % __WEBPACK_IMPORTED_MODULE_0__Cell__["a" /* cellSize */];
-    hgt += __WEBPACK_IMPORTED_MODULE_0__Cell__["a" /* cellSize */];
+	hgt -=	hgt % __WEBPACK_IMPORTED_MODULE_0__Cell__["b" /* cellSize */];
+    hgt += __WEBPACK_IMPORTED_MODULE_0__Cell__["b" /* cellSize */];
     gridZone.style.height =	hgt + "px";
-	h = hgt / __WEBPACK_IMPORTED_MODULE_0__Cell__["a" /* cellSize */];
-    w = Math.floor((document.body.clientWidth)/ __WEBPACK_IMPORTED_MODULE_0__Cell__["a" /* cellSize */]); 
+	h = hgt / __WEBPACK_IMPORTED_MODULE_0__Cell__["b" /* cellSize */];
+    w = Math.floor(document.body.clientWidth / __WEBPACK_IMPORTED_MODULE_0__Cell__["b" /* cellSize */]); 
 }
 
 function initGrid() {
@@ -195,9 +220,9 @@ function initGrid() {
         for(let j = 0; j < w; j++) {
             const el = document.createElement("div");
             el.className = "cell";
-            grid[i][j] = new __WEBPACK_IMPORTED_MODULE_0__Cell__["b" /* default */](i,j,el);
-            grid[i][j].el.style.width = __WEBPACK_IMPORTED_MODULE_0__Cell__["a" /* cellSize */] + "px";
-            grid[i][j].el.style.height = __WEBPACK_IMPORTED_MODULE_0__Cell__["a" /* cellSize */] + "px";
+            grid[i][j] = new __WEBPACK_IMPORTED_MODULE_0__Cell__["c" /* default */](i,j,el);
+            grid[i][j].el.style.width = __WEBPACK_IMPORTED_MODULE_0__Cell__["b" /* cellSize */] + "px";
+            grid[i][j].el.style.height = __WEBPACK_IMPORTED_MODULE_0__Cell__["b" /* cellSize */] + "px";
             target.appendChild(grid[i][j].el);
         }
     }
@@ -205,9 +230,15 @@ function initGrid() {
 
 function resetPath() {
     for(let i = 0; i < lastPath.length; i++) {
-        if(lastPath[i].el.style.backgroundColor == "rgb(206, 235, 251)") {
-            lastPath[i].el.style.backgroundColor = "white";
-            lastPath[i].el.style.border = "1px solid #E6E6E6";
+        if(lastPath[i].el.style.backgroundColor == __WEBPACK_IMPORTED_MODULE_1__Draw__["b" /* Color */].path) {
+            lastPath[i].el.style.backgroundColor = __WEBPACK_IMPORTED_MODULE_1__Draw__["b" /* Color */].clearNode;
+            lastPath[i].el.style.border = __WEBPACK_IMPORTED_MODULE_1__Draw__["b" /* Color */].nodeBorder;
+        } 
+    }
+    for(let i = 0; i < drawOrder.length; i++) {
+        if(drawOrder[i].el.style.backgroundColor == __WEBPACK_IMPORTED_MODULE_1__Draw__["b" /* Color */].openNode || drawOrder[i].el.style.backgroundColor == __WEBPACK_IMPORTED_MODULE_1__Draw__["b" /* Color */].closedNode) {
+            grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor = __WEBPACK_IMPORTED_MODULE_1__Draw__["b" /* Color */].clearNode;
+            grid[drawOrder[i].x][drawOrder[i].y].el.style.border = __WEBPACK_IMPORTED_MODULE_1__Draw__["b" /* Color */].nodeBorder;
         } 
     }
 }
@@ -216,8 +247,8 @@ function clearGrid() {
     for(let i = 0; i < h; i++) {
         for(let j = 0; j < w; j++) {
             grid[i][j].obstacle = false;
-            grid[i][j].el.style.backgroundColor = "white";
-            grid[i][j].el.style.border = "1px solid #E6E6E6";
+            grid[i][j].el.style.backgroundColor = __WEBPACK_IMPORTED_MODULE_1__Draw__["b" /* Color */].clearNode;
+            grid[i][j].el.style.border = __WEBPACK_IMPORTED_MODULE_1__Draw__["b" /* Color */].border;
             goal = start = undefined;
         }
     }
@@ -226,500 +257,6 @@ function clearGrid() {
 
 /***/ }),
 /* 3 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Cell_js__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Grid__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__A_Star__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__Dijkstra__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__Draw__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__File__ = __webpack_require__(8);
-
-
-
-
-
-
-
-global.grid = [[]];
-global.lastPath = [];
-global.h = 0;
-global.w = 0;
-global.pos = undefined;
-global.int = undefined;
-global.lastStart = undefined; 
-global.lastStop = undefined;
-global.start = undefined;
-global.goal = undefined;
-
-window.onload = Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["b" /* initGrid */])();
-
-document.getElementById("grid").addEventListener("click",function(e){
-	if(document.getElementById("start").checked == true){
-		if(lastStart !== undefined) {
-			if(lastStart.obstacle == false && lastStart.style.backgroundColor == "rgb(147, 202, 59)") {
-				lastStart.style.backgroundColor = "white";
-				lastStart.style.border = "1px solid #E6E6E6";
-			}
-			Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["c" /* resetPath */])();
-		}
-		lastStart = e.target;
-		lastStart.style.backgroundColor = "#93CA3B";
-		lastStart.style.border = "0";
-		for(let i = 0; i < h; i++) {
-			for(let j = 0; j < w; j++) {
-				if(grid[i][j].el == lastStart){
-					start = grid[i][j];
-					start.obstacle = false;
-					lastStart.obstacle = false;                
-				}
-			}
-		}
-	} else if(document.getElementById("stop").checked == true){
-		if(lastStop !== undefined) {
-			if(lastStop.obstacle == false && lastStop.style.backgroundColor == "rgb(235, 73, 96)") {
-				lastStop.style.backgroundColor = "white";
-				lastStop.style.border = "1px solid #E6E6E6";      
-			}
-			Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["c" /* resetPath */])();
-		} 
-		lastStop = e.target;
-		lastStop.style.backgroundColor = "#EB4960";
-		lastStop.style.border = "0";
-		lastStop.obstacle = false;
-		for(let i = 0; i < h; i++) {
-			for(let j = 0; j < w; j++) {
-				if(grid[i][j].el == lastStop){
-					goal = grid[i][j];
-					goal.obstacle = false;
-				}
-			}
-		}
-	} else if(document.getElementById("obst").checked == true) {
-		let spot = e.target;
-		spot.style.backgroundColor = "#808080";
-		spot.style.border = "0";
-		for(let i = 0; i < h; i++) {
-			for(let j = 0; j < w; j++) {
-				if(grid[i][j].el == spot && grid[i][j].obstacle == false){
-					grid[i][j].obstacle = true;
-					if(grid[i][j] == goal) {
-						goal = undefined;
-						Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["c" /* resetPath */])();
-					}else if(grid[i][j] == start) {
-						start = undefined;
-						Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["c" /* resetPath */])();
-					}
-					if(Object(__WEBPACK_IMPORTED_MODULE_4__Draw__["c" /* isOnPath */])(grid[i][j])) {
-						Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["c" /* resetPath */])();
-						Object(__WEBPACK_IMPORTED_MODULE_2__A_Star__["a" /* aStar */])(start, goal);
-					}
-				} else if(grid[i][j].el == spot && grid[i][j].obstacle == true){
-					goal = undefined;
-					grid[i][j].obstacle = false;
-					grid[i][j].el.style.backgroundColor = "white";
-					grid[i][j].el.style.border = "1px solid #E6E6E6";
-				}
-			}
-		}
-	}
-});
-
-function runAlgorithm(){
-	if(document.getElementById('aStar').checked == true) {
-		Object(__WEBPACK_IMPORTED_MODULE_2__A_Star__["a" /* aStar */])(start, goal);
-		console.log('A* selected.');
-	} else if(document.getElementById('Dijkstra').checked == true) {
-		Object(__WEBPACK_IMPORTED_MODULE_3__Dijkstra__["a" /* dijkstra */])(start, goal);
-		console.log('Dijkstra selected.');
-	}
-}
-
-document.getElementById('generatePathBtn').addEventListener('click', runAlgorithm);
-document.getElementById('addObstacles').addEventListener('click', __WEBPACK_IMPORTED_MODULE_4__Draw__["d" /* setObstacles */]);
-document.getElementById('clearGrid').addEventListener('click', __WEBPACK_IMPORTED_MODULE_1__Grid__["a" /* clearGrid */]);
-document.getElementById('saveGrid').addEventListener('click', __WEBPACK_IMPORTED_MODULE_5__File__["b" /* saveGrid */]);
-document.getElementById('myFile').addEventListener('change', __WEBPACK_IMPORTED_MODULE_5__File__["a" /* readFile */], false);
-document.getElementById('getFile').onclick = function() {
-    document.getElementById('myFile').click();
-};
-
-
-
-// $('#grid').on('mousedown mouseup', function mouseState(e) {
-//     if (e.type == "mousedown") {
-// 		document.getElementById('grid').addEventListener('mouseover',(e) => {
-// 			let x = Math.floor(e.clientX / cellSize);
-// 			let y = Math.floor(e.clientY / cellSize); 
-// 			drawCell(y,x);
-// 			if(e.type == "mouseup") {
-// 				alert("realeased")
-// 			}
-// 		});			
-// 	}
-		
-					// if(grid[i][j] == goal) {
-					// 	goal = undefined;
-					// 	resetPath();
-					// }else if(grid[i][j] == start) {
-					// 	start = undefined;
-					// 	resetPath();
-					// }
-		// if(e.type == 'mousedown') {
-			// document.getElementById('grid').removeEventListener('mouseover', mouseState, true)
-		// 	console.log("asdas");
-		// }
-// });
-
-
-window.addEventListener('keyup',(e)=>{
-	if(e.keyCode == 81 || e.keyCode == 113) {
-		if(document.getElementById('start').checked == true) {
-			document.getElementById('stop').checked = true;
-		} else {
-			document.getElementById('start').checked = true;
-		}
-	}
-});
-
-function drawCell(x, y) {
-	grid[x][y].el.style.backgroundColor = "black";
-}
-
-
-
-
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(4)))
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports) {
-
-var g;
-
-// This works in non-strict mode
-g = (function() {
-	return this;
-})();
-
-try {
-	// This works if eval is allowed (see CSP)
-	g = g || Function("return this")() || (1,eval)("this");
-} catch(e) {
-	// This works if the window reference is available
-	if(typeof window === "object")
-		g = window;
-}
-
-// g can still be undefined, but nothing to do about it...
-// We return undefined, instead of nothing here, so it's
-// easier to handle this case. if(!global) { ...}
-
-module.exports = g;
-
-
-/***/ }),
-/* 5 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = aStar;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Grid__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Draw__ = __webpack_require__(1);
-
-
-
-
-function aStar(start,goal) {
-    if(start == undefined && goal == undefined) {
-        __WEBPACK_IMPORTED_MODULE_1__Draw__["a" /* Alert */].both();
-    } else if(start == undefined) {
-        __WEBPACK_IMPORTED_MODULE_1__Draw__["a" /* Alert */].start();
-    } else if(goal == undefined) {
-        __WEBPACK_IMPORTED_MODULE_1__Draw__["a" /* Alert */].goal();
-    } else {
-        if(lastPath.length > 0) {
-            Object(__WEBPACK_IMPORTED_MODULE_0__Grid__["c" /* resetPath */])();
-            lastPath = [];
-        }
-    
-        let closedSet = [];
-        let openSet = [];  
-    
-        start.g = 0;
-        start.h = start.heuristic(goal);
-        start.f = start.g + start.h;
-    
-        openSet.push(JSON.parse(JSON.stringify(start)));
-    
-        //Push the start cell in the open list
-        while(openSet.length > 0) {
-            let q = openSet[0];
-            //Get the cell with the lowest score from the open list
-            openSet.forEach((cell) => {
-                if(cell.f < q.f) {
-                    q = cell;
-                }
-            });
-            //Check if the goal is reached
-            if(q.x == goal.x && q.y == goal.y) {
-                let curr = q.parent;
-                while(curr.x != start.x || curr.y != start.y){
-                    curr.el = grid[curr.x][curr.y].el;
-                    lastPath.push(curr);
-                    curr = curr.parent;
-                }
-                int = setInterval(__WEBPACK_IMPORTED_MODULE_1__Draw__["b" /* drawPath */], 5);
-                console.log(lastPath);
-                return;
-            }
-
-            //Pop the cell from the open list
-            let index = openSet.indexOf(q);
-            if(index > -1) {
-                openSet.splice(index, 1);
-            }
-    
-            //Switch the cell to the closed list
-            closedSet.push(q);
-            
-            //Get the neighbors array of the current cell    
-            let neighborsSet = neighbors(q);
-            for(let i = 0; i < neighborsSet.length; i++) {
-                let openNeighbor;
-                let isClosed = false;
-                closedSet.forEach((cell) => {
-                    if(cell.x == neighborsSet[i].x && cell.y == neighborsSet[i].y) {
-                        isClosed = true;
-                    }
-                });
-                if(isClosed == false) {
-                    neighborsSet[i].h = neighborsSet[i].heuristic(goal);
-                    neighborsSet[i].f = neighborsSet[i].g + neighborsSet[i].h;
-                    let isOpen = false;
-                    openSet.forEach((cell) => {
-                        if(cell.x == neighborsSet[i].x && cell.y == neighborsSet[i].y) {
-                            isOpen = true;
-                            openNeighbor = cell;
-                        }
-                    });
-                    if(isOpen == false) {
-                        openSet.push(JSON.parse(JSON.stringify(neighborsSet[i])));                        
-                    } else if(neighborsSet[i].g < openNeighbor.g) {
-                        openNeighbor.g = neighborsSet[i].g;
-                        openNeighbor.parent = neighborsSet[i].parent;
-                    }
-                } 
-            } 
-        }
-    return __WEBPACK_IMPORTED_MODULE_1__Draw__["a" /* Alert */].notFound();
-    }
-}
-    
-//Generate the neighbors of the current cell
-function neighbors(node) {
-	let neighbors = [];
-    let i = node.x;
-    let j = node.y;
-    if (j > 0 && !grid[i][j-1].obstacle) {
-        neighbors.push(grid[i][j - 1])
-        grid[i][j-1].g = node.g + 5;
-        grid[i][j-1].parent = node;
-    }
-    if (j < w - 1 && !grid[i][j+1].obstacle) {
-        neighbors.push(grid[i][j + 1])
-        grid[i][j+1].g = node.g + 5;
-        grid[i][j+1].parent = node;
-    }
-    
-    if (i > 0 && !grid[i-1][j].obstacle) {
-        neighbors.push(grid[i - 1][j]);
-        grid[i-1][j].g = node.g + 5;
-        grid[i-1][j].parent = node;
-    }
-    if (i < h - 1 && !grid[i+1][j].obstacle) {
-        neighbors.push(grid[i + 1][j]);
-        grid[i+1][j].g = node.g + 5;
-        grid[i+1][j].parent = node;
-    }     
-	return neighbors;
-}
-
-
-
-
-
-//In case
-
-// function neighbors(node) {
-// 	let neighbors = [];
-// 	for(let ii = -1; ii <= 1; ii++) {
-// 		for(let jj = -1; jj <= 1; jj++) {
-// 			let i = node.x + ii;
-// 			let j = node.y + jj;
-// 			if(i >= 0 && j >= 0 && i < h && j < w && (i != node.x || j != node.y) && !grid[i][j].obstacle) {
-// 				neighbors.push(grid[i][j]);
-// 				if((ii == -1 || ii == 1) && (jj == -1 || jj == 1)) {
-// 					grid[i][j].g = node.g + 7;  
-// 				} else {
-// 					grid[i][j].g = node.g + 5;
-// 				}
-// 				grid[i][j].parent = node;
-// 			}
-// 		}
-// 	}
-// 	return neighbors;
-// }
-
-/***/ }),
-/* 6 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = dijkstra;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Grid__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Draw__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Cell_js__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__priority_queue__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__priority_queue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__priority_queue__);
-
-
-
-
-
-
-let horizontalVerticalDistance = 1;
-let diagonalDistance = 2;
-
-
-function dijkstra(start,goal) {
-    let iteration = 0;
-    if(start == undefined && goal == undefined) {
-        __WEBPACK_IMPORTED_MODULE_1__Draw__["a" /* Alert */].both();
-    } else if(start == undefined) {
-        __WEBPACK_IMPORTED_MODULE_1__Draw__["a" /* Alert */].start();
-    } else if(goal == undefined) {
-        __WEBPACK_IMPORTED_MODULE_1__Draw__["a" /* Alert */].goal();
-    } else {
-        let currentNode;
-        let tempNode;
-
-        if(lastPath.length > 0) {
-            Object(__WEBPACK_IMPORTED_MODULE_0__Grid__["c" /* resetPath */])();
-            lastPath = []; 
-        }
-
-        start.distance = 0;
-
-        var queue = new __WEBPACK_IMPORTED_MODULE_3__priority_queue___default.a({ comparator: function(a,  b) {return a.distance - b.distance}});
-        queue.queue(start);
-
-        while(queue.length > 0){
-            currentNode = queue.dequeue();
-            tempNode = new __WEBPACK_IMPORTED_MODULE_2__Cell_js__["b" /* default */](0,0,currentNode.el);
-
-          // TOP
-          if(currentNode.x - 1 >= 0){
-              tempNode = grid[currentNode.x-1][currentNode.y];
-              if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + horizontalVerticalDistance) {
-                  tempNode.distance = currentNode.distance + horizontalVerticalDistance;
-                  tempNode.parent = currentNode;
-                  queue.queue(tempNode);
-                }
-
-                // // TOP LEFT
-                // if (currentNode.y - 1 > 0) {
-                //     tempNode = grid[currentNode.x - 1][currentNode.y - 1];
-                //     if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + diagonalDistance) {
-                //         tempNode.distance = currentNode.distance + diagonalDistance;
-                //         tempNode.parent = currentNode;
-                //         queue.queue(tempNode);
-                //     }
-                // }
-                //
-                // // TOP RIGHT
-                // if (currentNode.y + 1 < width) {
-                //     tempNode = grid[currentNode.x - 1][currentNode.y + 1];
-                //     if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + diagonalDistance) {
-                //         tempNode.distance = currentNode.distance + diagonalDistance;
-                //         tempNode.parent = currentNode;
-                //         queue.queue(tempNode);
-                //     }
-                // }
-            }
-
-            // LEFT
-            // delete -1
-            if (currentNode.y > 0) {
-                  tempNode = grid[currentNode.x][currentNode.y - 1];
-                  if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + horizontalVerticalDistance) {
-                      tempNode.distance = currentNode.distance + horizontalVerticalDistance;
-                      tempNode.parent = currentNode;
-                      queue.queue(tempNode);
-                    }
-            }
-            // RIGHT
-            if (currentNode.y + 1 < w) {
-                tempNode = grid[currentNode.x][currentNode.y + 1];
-                if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + horizontalVerticalDistance) {
-                    tempNode.distance = currentNode.distance + horizontalVerticalDistance;
-                    tempNode.parent = currentNode;
-                    queue.queue(tempNode);
-                }
-            }
-            // DOWN
-            if (currentNode.x + 1 < h) {
-                tempNode = grid[currentNode.x + 1][currentNode.y];
-                if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + horizontalVerticalDistance) {
-                    tempNode.distance = currentNode.distance + horizontalVerticalDistance;
-                    tempNode.parent = currentNode;
-                    queue.queue(tempNode);
-                }
-                // // DOWN LEFT
-                // if (currentNode.y - 1 >= 0) {
-                //     tempNode = grid[currentNode.x + 1][currentNode.y - 1];
-                //     if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + diagonalDistance) {
-                //         tempNode.distance = currentNode.distance + diagonalDistance;
-                //         tempNode.parent = currentNode;
-                //         queue.queue(tempNode);
-                //     }
-                // }
-                //
-                // // DOWN RIGHT
-                // if (currentNode.y + 1 < width) {
-                //     tempNode = grid[currentNode.x + 1][currentNode.y + 1];
-                //     if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + diagonalDistance) {
-                //         tempNode.distance = currentNode.distance + diagonalDistance;
-                //         tempNode.parent = currentNode;
-                //         queue.queue(tempNode);
-                //     }
-                // }
-            }
-            currentNode.visited = true;
-          }
-
-          // CHECK IF PATH EXISTS
-          if(!(grid[goal.x][goal.y].distance == Number.MAX_VALUE)){
-              let cNode = grid[goal.x][goal.y].parent;
-              while(cNode.parent != null) {
-                  cNode.el = grid[cNode.x][cNode.y].el;
-                  lastPath.push(cNode);
-                  cNode = cNode.parent;
-              }
-              int = setInterval(__WEBPACK_IMPORTED_MODULE_1__Draw__["b" /* drawPath */], 5);
-              console.log(lastPath);
-              return;
-          } else {
-              return __WEBPACK_IMPORTED_MODULE_1__Draw__["a" /* Alert */].notFound();
-          }
-     }
-}
-
-
-/***/ }),
-/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var require;var require;(function(f){if(true){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.PriorityQueue = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return require(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
@@ -1111,6 +648,519 @@ module.exports = BinaryHeapStrategy = (function() {
 });
 
 /***/ }),
+/* 4 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Cell_js__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Grid__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__A_Star__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__Dijkstra__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__Draw__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__File__ = __webpack_require__(8);
+
+
+
+
+
+
+
+global.grid = [[]];
+global.lastPath = [];
+global.drawOrder = [];
+global.h = 0;
+global.w = 0;
+global.lastStart = undefined; 
+global.lastStop = undefined;
+global.start = undefined;
+global.goal = undefined;
+
+window.onload = Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["b" /* initGrid */])();
+
+document.getElementById("grid").addEventListener("click",function(e){
+	if(document.getElementById("start").checked == true){
+		if(lastStart !== undefined) {
+			if(lastStart.obstacle == false && lastStart.style.backgroundColor == "rgb(147, 202, 59)") {
+				lastStart.style.backgroundColor = "white";
+				lastStart.style.border = "1px solid #E6E6E6";
+			}
+			Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["c" /* resetPath */])();
+		}
+		lastStart = e.target;
+		lastStart.style.backgroundColor = "#93CA3B";
+		lastStart.style.border = "0";
+		for(let i = 0; i < h; i++) {
+			for(let j = 0; j < w; j++) {
+				if(grid[i][j].el == lastStart){
+					start = grid[i][j];
+					start.obstacle = false;
+					lastStart.obstacle = false;                
+				}
+			}
+		}
+	} else if(document.getElementById("stop").checked == true){
+		if(lastStop !== undefined) {
+			if(lastStop.obstacle == false && lastStop.style.backgroundColor == "rgb(235, 73, 96)") {
+				lastStop.style.backgroundColor = "white";
+				lastStop.style.border = "1px solid #E6E6E6";      
+			}
+			Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["c" /* resetPath */])();
+		} 
+		lastStop = e.target;
+		lastStop.style.backgroundColor = "#EB4960";
+		lastStop.style.border = "0";
+		lastStop.obstacle = false;
+		for(let i = 0; i < h; i++) {
+			for(let j = 0; j < w; j++) {
+				if(grid[i][j].el == lastStop){
+					goal = grid[i][j];
+					goal.obstacle = false;
+				}
+			}
+		}
+	} else if(document.getElementById("obst").checked == true) {
+		let spot = e.target;
+		spot.style.backgroundColor = "#808080";
+		spot.style.border = "0";
+		for(let i = 0; i < h; i++) {
+			for(let j = 0; j < w; j++) {
+				if(grid[i][j].el == spot && grid[i][j].obstacle == false){
+					grid[i][j].obstacle = true;
+					if(grid[i][j] == goal) {
+						goal = undefined;
+						Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["c" /* resetPath */])();
+					}else if(grid[i][j] == start) {
+						start = undefined;
+						Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["c" /* resetPath */])();
+					}
+					if(Object(__WEBPACK_IMPORTED_MODULE_4__Draw__["d" /* isOnPath */])(grid[i][j])) {
+						Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["c" /* resetPath */])();
+						Object(__WEBPACK_IMPORTED_MODULE_2__A_Star__["a" /* aStar */])(start, goal);
+					}
+				} else if(grid[i][j].el == spot && grid[i][j].obstacle == true){
+					goal = undefined;
+					grid[i][j].obstacle = false;
+					grid[i][j].el.style.backgroundColor = "white";
+					grid[i][j].el.style.border = "1px solid #E6E6E6";
+				}
+			}
+		}
+	}
+});
+
+function runAlgorithm(){
+	if(document.getElementById('aStar').checked == true) {
+		Object(__WEBPACK_IMPORTED_MODULE_2__A_Star__["a" /* aStar */])(start, goal);
+		console.log('A* selected.');
+	} else if(document.getElementById('Dijkstra').checked == true) {
+		Object(__WEBPACK_IMPORTED_MODULE_3__Dijkstra__["a" /* dijkstra */])(start, goal);
+		console.log('Dijkstra selected.');
+	}
+}
+
+document.getElementById('generatePathBtn').addEventListener('click', runAlgorithm);
+document.getElementById('addObstacles').addEventListener('click', __WEBPACK_IMPORTED_MODULE_4__Draw__["e" /* setObstacles */]);
+document.getElementById('clearGrid').addEventListener('click', __WEBPACK_IMPORTED_MODULE_1__Grid__["a" /* clearGrid */]);
+document.getElementById('saveGrid').addEventListener('click', __WEBPACK_IMPORTED_MODULE_5__File__["b" /* saveGrid */]);
+document.getElementById('myFile').addEventListener('change', __WEBPACK_IMPORTED_MODULE_5__File__["a" /* readFile */], false);
+document.getElementById('getFile').onclick = function() {
+    document.getElementById('myFile').click();
+};
+
+
+
+// $('#grid').on('mousedown mouseup', function mouseState(e) {
+//     if (e.type == "mousedown") {
+// 		document.getElementById('grid').addEventListener('mouseover',(e) => {
+// 			let x = Math.floor(e.clientX / cellSize);
+// 			let y = Math.floor(e.clientY / cellSize); 
+// 			drawCell(y,x);
+// 			if(e.type == "mouseup") {
+// 				alert("realeased")
+// 			}
+// 		});			
+// 	}
+		
+					// if(grid[i][j] == goal) {
+					// 	goal = undefined;
+					// 	resetPath();
+					// }else if(grid[i][j] == start) {
+					// 	start = undefined;
+					// 	resetPath();
+					// }
+		// if(e.type == 'mousedown') {
+			// document.getElementById('grid').removeEventListener('mouseover', mouseState, true)
+		// 	console.log("asdas");
+		// }
+// });
+
+
+window.addEventListener('keyup',(e)=>{
+	if(e.keyCode == 81 || e.keyCode == 113) {
+		if(document.getElementById('start').checked == true) {
+			document.getElementById('stop').checked = true;
+		} else {
+			document.getElementById('start').checked = true;
+		}
+	}
+});
+
+function drawCell(x, y) {
+	grid[x][y].el.style.backgroundColor = "black";
+}
+
+
+
+
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(5)))
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports) {
+
+var g;
+
+// This works in non-strict mode
+g = (function() {
+	return this;
+})();
+
+try {
+	// This works if eval is allowed (see CSP)
+	g = g || Function("return this")() || (1,eval)("this");
+} catch(e) {
+	// This works if the window reference is available
+	if(typeof window === "object")
+		g = window;
+}
+
+// g can still be undefined, but nothing to do about it...
+// We return undefined, instead of nothing here, so it's
+// easier to handle this case. if(!global) { ...}
+
+module.exports = g;
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = aStar;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Cell__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Grid__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Draw__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__priority_queue__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__priority_queue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__priority_queue__);
+
+
+
+
+
+
+
+function aStar (start, goal) {
+    if (start == undefined && goal == undefined) {
+        __WEBPACK_IMPORTED_MODULE_2__Draw__["a" /* Alert */].both();
+    } else if (start == undefined) {
+        __WEBPACK_IMPORTED_MODULE_2__Draw__["a" /* Alert */].start();
+    } else if (goal == undefined) {
+        __WEBPACK_IMPORTED_MODULE_2__Draw__["a" /* Alert */].goal();
+    } else {
+        if (lastPath.length > 0) {
+            Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["c" /* resetPath */])();
+            lastPath = [];
+        }
+        let counter = 0;
+    
+        let closedSet = [];
+        let openSet = [];
+    
+        start.g = 0;
+        start.h = start.heuristic(goal);
+        start.f = start.g + start.h;
+        
+        //Push the start cell in the open list
+        openSet.push(start);
+        
+        while(openSet.length > 0) {
+            // Get the cell with the lowest score from the open list
+            let lowestF = 0;
+            for (let i = 0, len = openSet.length; i < len; i++) {
+                if (openSet[i].f < openSet[lowestF].f) {
+                    lowestF = i;
+                }
+            }
+            let q = openSet[lowestF];
+            //Check if the goal is reached
+            if(q.x == goal.x && q.y == goal.y) {
+                let curr = q.parent;
+                while(curr.x != start.x || curr.y != start.y){
+                    curr.el = grid[curr.x][curr.y].el;
+                    lastPath.push(curr);
+                    curr = curr.parent;
+                }
+                Object(__WEBPACK_IMPORTED_MODULE_2__Draw__["c" /* drawPath */])(drawOrder, lastPath);
+                console.log("Min path length: " + lastPath.length);
+                console.log("Counter: " + counter);
+                console.log("openSet length: " + openSet.length)
+                console.log("closedSet length: " + closedSet.length)
+
+                return;
+            }
+            
+            openSet.splice(lowestF, 1);
+
+            //Switch the cell to the closed list
+            closedSet.push(q);
+            q.opened = false;
+            drawOrder.push(q);
+            
+            //Get the neighbors array of the current cell    
+            let neighborsSet = neighbors(q);
+            for(let i = 0; i < neighborsSet.length; i++) {
+                if (indexOfNode(closedSet, neighborsSet[i]) === -1) {
+                    var index = indexOfNode(openSet, neighborsSet[i]);
+                    if (index === -1) {
+                        neighborsSet[i].f = neighborsSet[i].g + neighborsSet[i].heuristic(goal);
+                        openSet.push(neighborsSet[i]);
+                        neighborsSet[i].opened = true;
+                        drawOrder.push(neighborsSet[i])
+                    } else if (neighborsSet[i].g < openSet[index].g) {
+                        neighborsSet[i].f = neighborsSet[i].g + neighborsSet[i].heuristic(goal);
+                        openSet[index] = neighborsSet[i];
+                    }
+                }
+            } 
+        }
+    return __WEBPACK_IMPORTED_MODULE_2__Draw__["a" /* Alert */].notFound();
+    }
+}
+
+//Generate the neighbors of the current cell
+function neighbors(node) {
+	let neighbors = [];
+    let i = node.x;
+    let j = node.y;
+    if (j > 0 && !grid[i][j - 1].obstacle) {
+        let newNode = new __WEBPACK_IMPORTED_MODULE_0__Cell__["c" /* default */](i, j - 1, node.el);
+        newNode.g = node.g + __WEBPACK_IMPORTED_MODULE_0__Cell__["a" /* STRAIGHT_COST */];
+        newNode.parent = node;
+        neighbors.push(newNode);
+    }
+    if (j < w - 1 && !grid[i][j + 1].obstacle) {
+        let newNode = new __WEBPACK_IMPORTED_MODULE_0__Cell__["c" /* default */](i, j + 1, node.el);
+        newNode.g = node.g + __WEBPACK_IMPORTED_MODULE_0__Cell__["a" /* STRAIGHT_COST */];
+        newNode.parent = node;
+        neighbors.push(newNode);
+    }
+    
+    if (i > 0 && !grid[i - 1][j].obstacle) {
+        let newNode = new __WEBPACK_IMPORTED_MODULE_0__Cell__["c" /* default */](i - 1, j, node.el);
+        newNode.g = node.g + __WEBPACK_IMPORTED_MODULE_0__Cell__["a" /* STRAIGHT_COST */];
+        newNode.parent = node;
+        neighbors.push(newNode);
+    }
+    if (i < h - 1 && !grid[i + 1][j].obstacle) {
+        let newNode = new __WEBPACK_IMPORTED_MODULE_0__Cell__["c" /* default */](i + 1, j, node.el);
+        newNode.g = node.g + __WEBPACK_IMPORTED_MODULE_0__Cell__["a" /* STRAIGHT_COST */];
+        newNode.parent = node;
+        neighbors.push(newNode);
+    }     
+	return neighbors;
+}
+
+
+function indexOfNode(array, node) {
+    for (let i = 0; i < array.length; i++) {
+      if (node.x == array[i].x && node.y == array[i].y) {
+        return i;
+      }
+    }
+    return -1;
+}
+
+
+
+
+//In case
+
+// function neighbors(node) {
+// 	let neighbors = [];
+// 	for(let ii = -1; ii <= 1; ii++) {
+// 		for(let jj = -1; jj <= 1; jj++) {
+// 			let i = node.x + ii;
+// 			let j = node.y + jj;
+// 			if(i >= 0 && j >= 0 && i < h && j < w && (i != node.x || j != node.y) && !grid[i][j].obstacle) {
+// 				neighbors.push(grid[i][j]);
+// 				if((ii == -1 || ii == 1) && (jj == -1 || jj == 1)) {
+// 					grid[i][j].g = node.g + 7;  
+// 				} else {
+// 					grid[i][j].g = node.g + 5;
+// 				}
+// 				grid[i][j].parent = node;
+// 			}
+// 		}
+// 	}
+// 	return neighbors;
+// }
+
+
+
+  
+  
+
+/***/ }),
+/* 7 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = dijkstra;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Grid__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Draw__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Cell__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__priority_queue__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__priority_queue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__priority_queue__);
+
+
+
+
+
+
+let horizontalVerticalDistance = 1;
+let diagonalDistance = 2;
+///
+///
+function dijkstra(start, goal) {
+    let iteration = 0;
+    if (start == undefined && goal == undefined) {
+        __WEBPACK_IMPORTED_MODULE_1__Draw__["a" /* Alert */].both();
+    } else if (start == undefined) {
+        __WEBPACK_IMPORTED_MODULE_1__Draw__["a" /* Alert */].start();
+    } else if (goal == undefined) {
+        __WEBPACK_IMPORTED_MODULE_1__Draw__["a" /* Alert */].goal();
+    } else {
+        let currentNode;
+        let tempNode;
+
+        if(lastPath.length > 0) {
+            Object(__WEBPACK_IMPORTED_MODULE_0__Grid__["c" /* resetPath */])();
+            lastPath = []; 
+        }
+        let counter = 0;
+        start.distance = 0;
+
+        var queue = new __WEBPACK_IMPORTED_MODULE_3__priority_queue___default.a({ comparator: function(a,  b) {return a.distance - b.distance}});
+        queue.queue(start);
+        while(queue.length > 0){
+            currentNode = queue.dequeue();
+            tempNode = new __WEBPACK_IMPORTED_MODULE_2__Cell__["c" /* default */](0, 0, currentNode.el);
+
+          // TOP
+          if(currentNode.x - 1 >= 0){
+              tempNode = grid[currentNode.x-1][currentNode.y];
+              if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + horizontalVerticalDistance) {
+                  tempNode.distance = currentNode.distance + horizontalVerticalDistance;
+                  tempNode.parent = currentNode;
+                  queue.queue(tempNode);
+                  counter++;
+                }
+
+                // // TOP LEFT
+                // if (currentNode.y - 1 > 0) {
+                //     tempNode = grid[currentNode.x - 1][currentNode.y - 1];
+                //     if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + diagonalDistance) {
+                //         tempNode.distance = currentNode.distance + diagonalDistance;
+                //         tempNode.parent = currentNode;
+                //         queue.queue(tempNode);
+                //     }
+                // }
+                //
+                // // TOP RIGHT
+                // if (currentNode.y + 1 < width) {
+                //     tempNode = grid[currentNode.x - 1][currentNode.y + 1];
+                //     if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + diagonalDistance) {
+                //         tempNode.distance = currentNode.distance + diagonalDistance;
+                //         tempNode.parent = currentNode;
+                //         queue.queue(tempNode);
+                //     }
+                // }
+            }
+
+            // LEFT
+            // delete -1
+            if (currentNode.y > 0) {
+                  tempNode = grid[currentNode.x][currentNode.y - 1];
+                  if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + horizontalVerticalDistance) {
+                      tempNode.distance = currentNode.distance + horizontalVerticalDistance;
+                      tempNode.parent = currentNode;
+                      queue.queue(tempNode);
+                      counter++;
+                    }
+            }
+            // RIGHT
+            if (currentNode.y + 1 < w) {
+                tempNode = grid[currentNode.x][currentNode.y + 1];
+                if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + horizontalVerticalDistance) {
+                    tempNode.distance = currentNode.distance + horizontalVerticalDistance;
+                    tempNode.parent = currentNode;
+                    queue.queue(tempNode);
+                    counter++;
+                }
+            }
+            // DOWN
+            if (currentNode.x + 1 < h) {
+                tempNode = grid[currentNode.x + 1][currentNode.y];
+                if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + horizontalVerticalDistance) {
+                    tempNode.distance = currentNode.distance + horizontalVerticalDistance;
+                    tempNode.parent = currentNode;
+                    queue.queue(tempNode);
+                    counter++;
+                }
+                // // DOWN LEFT
+                // if (currentNode.y - 1 >= 0) {
+                //     tempNode = grid[currentNode.x + 1][currentNode.y - 1];
+                //     if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + diagonalDistance) {
+                //         tempNode.distance = currentNode.distance + diagonalDistance;
+                //         tempNode.parent = currentNode;
+                //         queue.queue(tempNode);
+                //     }
+                // }
+                //
+                // // DOWN RIGHT
+                // if (currentNode.y + 1 < width) {
+                //     tempNode = grid[currentNode.x + 1][currentNode.y + 1];
+                //     if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + diagonalDistance) {
+                //         tempNode.distance = currentNode.distance + diagonalDistance;
+                //         tempNode.parent = currentNode;
+                //         queue.queue(tempNode);
+                //     }
+                // }
+            }
+            currentNode.visited = true;
+          }
+
+          // CHECK IF PATH EXISTS
+          if(!(grid[goal.x][goal.y].distance == Number.MAX_VALUE)){
+              let cNode = grid[goal.x][goal.y].parent;
+              while(cNode.parent != null) {
+                  cNode.el = grid[cNode.x][cNode.y].el;
+                  lastPath.push(cNode);
+                  cNode = cNode.parent;
+              }
+              int = setInterval(__WEBPACK_IMPORTED_MODULE_1__Draw__["c" /* drawPath */], 5);
+                console.log("Min path length: " + lastPath.length);
+                console.log("Counter: " + counter);
+              return;
+          } else {
+              return __WEBPACK_IMPORTED_MODULE_1__Draw__["a" /* Alert */].notFound();
+          }
+     }
+}
+
+
+/***/ }),
 /* 8 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -1189,17 +1239,17 @@ function draw(img) {
     }
     // console.log(arrayMatrix);
     let filteredImage = "";
-    for(let i = 0; i < h - __WEBPACK_IMPORTED_MODULE_1__Cell__["a" /* cellSize */] + 1; i += __WEBPACK_IMPORTED_MODULE_1__Cell__["a" /* cellSize */]) {
-        for(let j = 0; j < w - __WEBPACK_IMPORTED_MODULE_1__Cell__["a" /* cellSize */] +1; j += __WEBPACK_IMPORTED_MODULE_1__Cell__["a" /* cellSize */]) {
+    for(let i = 0; i < h - __WEBPACK_IMPORTED_MODULE_1__Cell__["b" /* cellSize */] + 1; i += __WEBPACK_IMPORTED_MODULE_1__Cell__["b" /* cellSize */]) {
+        for(let j = 0; j < w - __WEBPACK_IMPORTED_MODULE_1__Cell__["b" /* cellSize */] +1; j += __WEBPACK_IMPORTED_MODULE_1__Cell__["b" /* cellSize */]) {
             let filter = 0;
-            for(let n = i; n < i + __WEBPACK_IMPORTED_MODULE_1__Cell__["a" /* cellSize */]; n++) {
-                for(let m = j; m < j + __WEBPACK_IMPORTED_MODULE_1__Cell__["a" /* cellSize */]; m++) {
+            for(let n = i; n < i + __WEBPACK_IMPORTED_MODULE_1__Cell__["b" /* cellSize */]; n++) {
+                for(let m = j; m < j + __WEBPACK_IMPORTED_MODULE_1__Cell__["b" /* cellSize */]; m++) {
                     if(arrayMatrix[n][m].r / 255 <= 0.3 && arrayMatrix[n][m].g / 255 <= 0.3 && arrayMatrix[n][m].b / 255 <= 0.3) {
                         filter++;
                     }
                 }
             }
-            if(filter >= __WEBPACK_IMPORTED_MODULE_1__Cell__["a" /* cellSize */]**2/2) {
+            if(filter >= __WEBPACK_IMPORTED_MODULE_1__Cell__["b" /* cellSize */]**2/2) {
                 filteredImage += '1'
             } else filteredImage += '0'
         }

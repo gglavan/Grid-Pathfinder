@@ -1,10 +1,11 @@
+import Cell from './Cell'
+import { STRAIGHT_COST } from './Cell'
 import { resetPath } from './Grid'
 import { drawPath } from './Draw'
 import { Alert } from './Draw'
 import PriorityQueue from './priority-queue'
 
-
-export function aStar(start, goal) {
+export function aStar (start, goal) {
     if (start == undefined && goal == undefined) {
         Alert.both();
     } else if (start == undefined) {
@@ -16,18 +17,27 @@ export function aStar(start, goal) {
             resetPath();
             lastPath = [];
         }
-            
+        let counter = 0;
+    
+        let closedSet = [];
+        let openSet = [];
+    
         start.g = 0;
         start.h = start.heuristic(goal);
         start.f = start.g + start.h;
         
         //Push the start cell in the open list
-        var queue = new PriorityQueue({ comparator: function(a,  b) {return a.f - b.f}});
-        console.log("Queue")
-        queue.queue(start);
+        openSet.push(start);
         
-        while(queue.length > 0) {
-            let q = queue.dequeue();
+        while(openSet.length > 0) {
+            // Get the cell with the lowest score from the open list
+            let lowestF = 0;
+            for (let i = 0, len = openSet.length; i < len; i++) {
+                if (openSet[i].f < openSet[lowestF].f) {
+                    lowestF = i;
+                }
+            }
+            let q = openSet[lowestF];
             //Check if the goal is reached
             if(q.x == goal.x && q.y == goal.y) {
                 let curr = q.parent;
@@ -36,72 +46,85 @@ export function aStar(start, goal) {
                     lastPath.push(curr);
                     curr = curr.parent;
                 }
-                int = setInterval(drawPath, 5);
-                console.log(lastPath);
-                console.log("WTF")
+                drawPath(drawOrder, lastPath);
+                console.log("Min path length: " + lastPath.length);
+                console.log("Counter: " + counter);
+                console.log("openSet length: " + openSet.length)
+                console.log("closedSet length: " + closedSet.length)
+
                 return;
             }
+            
+            openSet.splice(lowestF, 1);
 
             //Switch the cell to the closed list
-            q.visited = true;
+            closedSet.push(q);
+            q.opened = false;
+            drawOrder.push(q);
             
             //Get the neighbors array of the current cell    
             let neighborsSet = neighbors(q);
             for(let i = 0; i < neighborsSet.length; i++) {
-                let openNeighbor;
-                if(!neighborsSet[i].visited) {
-                    neighborsSet[i].h = neighborsSet[i].heuristic(goal);
-                    neighborsSet[i].f = neighborsSet[i].g + neighborsSet[i].h;
-                    let isOpen = false;
-                    openSet.forEach((cell) => {
-                        if(cell.x == neighborsSet[i].x && cell.y == neighborsSet[i].y) {
-                            isOpen = true;
-                            openNeighbor = cell;
-                        }
-                    });
-                    if(isOpen == false) {
-                        // openSet.push(JSON.parse(JSON.stringify(neighborsSet[i])));
-                        queue.queue(neighborsSet[i])                   
-                    } else if(neighborsSet[i].g < openNeighbor.g) {
-                        openNeighbor.g = neighborsSet[i].g;
-                        openNeighbor.parent = neighborsSet[i].parent;
+                if (indexOfNode(closedSet, neighborsSet[i]) === -1) {
+                    var index = indexOfNode(openSet, neighborsSet[i]);
+                    if (index === -1) {
+                        neighborsSet[i].f = neighborsSet[i].g + neighborsSet[i].heuristic(goal);
+                        openSet.push(neighborsSet[i]);
+                        neighborsSet[i].opened = true;
+                        drawOrder.push(neighborsSet[i])
+                    } else if (neighborsSet[i].g < openSet[index].g) {
+                        neighborsSet[i].f = neighborsSet[i].g + neighborsSet[i].heuristic(goal);
+                        openSet[index] = neighborsSet[i];
                     }
-                } 
+                }
             } 
         }
     return Alert.notFound();
     }
 }
-    
+
 //Generate the neighbors of the current cell
 function neighbors(node) {
 	let neighbors = [];
     let i = node.x;
     let j = node.y;
     if (j > 0 && !grid[i][j - 1].obstacle) {
-        neighbors.push(grid[i][j - 1])
-        grid[i][j - 1].g = node.g + 5;
-        grid[i][j - 1].parent = node;
+        let newNode = new Cell(i, j - 1, node.el);
+        newNode.g = node.g + STRAIGHT_COST;
+        newNode.parent = node;
+        neighbors.push(newNode);
     }
     if (j < w - 1 && !grid[i][j + 1].obstacle) {
-        neighbors.push(grid[i][j + 1])
-        grid[i][j + 1].g = node.g + 5;
-        grid[i][j + 1].parent = node;
+        let newNode = new Cell(i, j + 1, node.el);
+        newNode.g = node.g + STRAIGHT_COST;
+        newNode.parent = node;
+        neighbors.push(newNode);
     }
     
     if (i > 0 && !grid[i - 1][j].obstacle) {
-        neighbors.push(grid[i - 1][j]);
-        grid[i - 1][j].g = node.g + 5;
-        grid[i - 1][j].parent = node;
+        let newNode = new Cell(i - 1, j, node.el);
+        newNode.g = node.g + STRAIGHT_COST;
+        newNode.parent = node;
+        neighbors.push(newNode);
     }
     if (i < h - 1 && !grid[i + 1][j].obstacle) {
-        neighbors.push(grid[i + 1][j]);
-        grid[i + 1][j].g = node.g + 5;
-        grid[i + 1][j].parent = node;
+        let newNode = new Cell(i + 1, j, node.el);
+        newNode.g = node.g + STRAIGHT_COST;
+        newNode.parent = node;
+        neighbors.push(newNode);
     }     
 	return neighbors;
 }
 
+
+function indexOfNode(array, node) {
+    for (let i = 0; i < array.length; i++) {
+      if (node.x == array[i].x && node.y == array[i].y) {
+        return i;
+      }
+    }
+    return -1;
+}
 
 
 
@@ -127,3 +150,8 @@ function neighbors(node) {
 // 	}
 // 	return neighbors;
 // }
+
+
+
+  
+  

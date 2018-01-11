@@ -1,7 +1,8 @@
 import Cell from './Cell'
-import {cellSize} from './Cell'
+import { cellSize } from './Cell'
+import { Color } from './Draw'
 
-function adjustSize() {
+function adjustSize () {
 	const exc = document.getElementById("menu").clientHeight;
 	const gridZone = document.getElementById("grid");
 	let hgt = document.body.clientHeight - exc;
@@ -9,7 +10,7 @@ function adjustSize() {
     hgt += cellSize;
     gridZone.style.height =	hgt + "px";
 	h = hgt / cellSize;
-    w = Math.floor((document.body.clientWidth)/ cellSize); 
+    w = Math.floor(document.body.clientWidth / cellSize); 
 }
 
 export function initGrid() {
@@ -31,9 +32,15 @@ export function initGrid() {
 
 export function resetPath() {
     for(let i = 0; i < lastPath.length; i++) {
-        if(lastPath[i].el.style.backgroundColor == "rgb(206, 235, 251)") {
-            lastPath[i].el.style.backgroundColor = "white";
-            lastPath[i].el.style.border = "1px solid #E6E6E6";
+        if(lastPath[i].el.style.backgroundColor == Color.path) {
+            lastPath[i].el.style.backgroundColor = Color.clearNode;
+            lastPath[i].el.style.border = Color.nodeBorder;
+        } 
+    }
+    for(let i = 0; i < drawOrder.length; i++) {
+        if(drawOrder[i].el.style.backgroundColor == Color.openNode || drawOrder[i].el.style.backgroundColor == Color.closedNode) {
+            grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor = Color.clearNode;
+            grid[drawOrder[i].x][drawOrder[i].y].el.style.border = Color.nodeBorder;
         } 
     }
 }
@@ -42,8 +49,8 @@ export function clearGrid() {
     for(let i = 0; i < h; i++) {
         for(let j = 0; j < w; j++) {
             grid[i][j].obstacle = false;
-            grid[i][j].el.style.backgroundColor = "white";
-            grid[i][j].el.style.border = "1px solid #E6E6E6";
+            grid[i][j].el.style.backgroundColor = Color.clearNode;
+            grid[i][j].el.style.border = Color.border;
             goal = start = undefined;
         }
     }

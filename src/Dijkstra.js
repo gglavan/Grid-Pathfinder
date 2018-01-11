@@ -1,12 +1,13 @@
 import {resetPath} from './Grid'
 import {drawPath} from './Draw'
 import {Alert} from './Draw'
-import Cell from './Cell.js'
+import Cell from './Cell'
 import PriorityQueue from './priority-queue'
 
 let horizontalVerticalDistance = 1;
 let diagonalDistance = 2;
-
+///
+///
 export function dijkstra(start, goal) {
     let iteration = 0;
     if (start == undefined && goal == undefined) {
@@ -23,15 +24,14 @@ export function dijkstra(start, goal) {
             resetPath();
             lastPath = []; 
         }
-
+        let counter = 0;
         start.distance = 0;
 
         var queue = new PriorityQueue({ comparator: function(a,  b) {return a.distance - b.distance}});
         queue.queue(start);
-
         while(queue.length > 0){
             currentNode = queue.dequeue();
-            tempNode = new Cell(0,0,currentNode.el);
+            tempNode = new Cell(0, 0, currentNode.el);
 
           // TOP
           if(currentNode.x - 1 >= 0){
@@ -40,6 +40,7 @@ export function dijkstra(start, goal) {
                   tempNode.distance = currentNode.distance + horizontalVerticalDistance;
                   tempNode.parent = currentNode;
                   queue.queue(tempNode);
+                  counter++;
                 }
 
                 // // TOP LEFT
@@ -71,6 +72,7 @@ export function dijkstra(start, goal) {
                       tempNode.distance = currentNode.distance + horizontalVerticalDistance;
                       tempNode.parent = currentNode;
                       queue.queue(tempNode);
+                      counter++;
                     }
             }
             // RIGHT
@@ -80,6 +82,7 @@ export function dijkstra(start, goal) {
                     tempNode.distance = currentNode.distance + horizontalVerticalDistance;
                     tempNode.parent = currentNode;
                     queue.queue(tempNode);
+                    counter++;
                 }
             }
             // DOWN
@@ -89,6 +92,7 @@ export function dijkstra(start, goal) {
                     tempNode.distance = currentNode.distance + horizontalVerticalDistance;
                     tempNode.parent = currentNode;
                     queue.queue(tempNode);
+                    counter++;
                 }
                 // // DOWN LEFT
                 // if (currentNode.y - 1 >= 0) {
@@ -122,7 +126,8 @@ export function dijkstra(start, goal) {
                   cNode = cNode.parent;
               }
               int = setInterval(drawPath, 5);
-              console.log(lastPath);
+                console.log("Min path length: " + lastPath.length);
+                console.log("Counter: " + counter);
               return;
           } else {
               return Alert.notFound();
