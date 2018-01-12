@@ -1,3 +1,6 @@
+import { isSameNode } from './Grid'
+
+// Colors container
 export const Color = {
 	openNode: "rgb(224, 242, 241)",
 	closedNode: "rgb(128, 203, 196)",
@@ -9,12 +12,20 @@ export const Color = {
 	nodeBorder: "1px solid rgb(230, 230, 230)"
 }
 
-// Draw path
+// Watch for the initial setup
+export const Alert = {
+	start: () => Materialize.toast('Please set the initial spot!', 1500, 'red darken-1'),
+	goal: () => Materialize.toast('Please set the finish spot!', 1500, 'red darken-1'),
+	both: () => Materialize.toast('Please set the initial spots!', 1500, 'red darken-1'),
+	notFound: () => Materialize.toast('Path not found!', 1500, 'red darken-1')
+}
+
+// Async function to draw the path
 export async function drawPath (drawOrder, lastPath) {
     if (lastPath.length) {
-        for(let i = 1, len = drawOrder.length - 2; i < len; i++) {
-            grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor = drawOrder[i].opened ? Color.closedNode : Color.openNode;
-            await sleep(5);
+        for (let i = 0, len = drawOrder.length; i < len; i++) {
+			grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor = drawOrder[i].opened ? Color.closedNode : Color.openNode;
+			await sleep(5);
         }
         for(let i = lastPath.length - 1; i >= 0; i--) {
             lastPath[i].el.style.backgroundColor = Color.path;
@@ -24,11 +35,27 @@ export async function drawPath (drawOrder, lastPath) {
     }
 }
 
-function sleep(ms) {
+// Reset the path
+export function resetPath() {
+    for (let i = 0; i < lastPath.length; i++) {
+        if (lastPath[i].el.style.backgroundColor == Color.path) {
+            lastPath[i].el.style.backgroundColor = Color.clearNode;
+            lastPath[i].el.style.border = Color.nodeBorder;
+        } 
+	}
+	for (let i = 0; i < drawOrder.length; i++) {
+		if (grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor == Color.openNode || 
+			grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor === Color.closedNode)
+				grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor = Color.clearNode;
+    }
+}
+
+// Implemented artificial sleep for async to work
+function sleep (ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-//Set obstacles
+// Generate the desired amount of obstacles
 export function setObstacles() {
 	const obst = 1000;
 	let arr = [];
@@ -50,21 +77,12 @@ export function setObstacles() {
 		i++;
 	}
 }
-//Check if the obstacle is on path
+
+// Check if the obstacle is on path
 export function isOnPath(curr) {
-	let isOn = false;
-	lastPath.forEach(cell => {
-		if (cell.x == curr.x && cell.y == curr.y) {
-			isOn = true; 
-			return isOn;
-		}
-	});
-	return isOn;
-}
-//Watch for the initial setup
-export const Alert = {
-	start: () => Materialize.toast('Please set the initial spot!', 1500, 'red darken-1'),
-	goal: () => Materialize.toast('Please set the finish spot!', 1500, 'red darken-1'),
-	both: () => Materialize.toast('Please set the initial spots!', 1500, 'red darken-1'),
-	notFound: () => Materialize.toast('Path not found!', 1500, 'red darken-1')
+	for (let i = 0, len = lastPath.length; i < len; i++) {
+		if (isSameNode(lastPath[i], curr))
+			return true;
+	}
+	return false;
 }

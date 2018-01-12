@@ -1,5 +1,5 @@
-import {resetPath} from './Grid'
-import {cellSize} from './Cell'
+import { resetPath } from './Draw'
+import { cellSize } from './Cell'
 
 export function readFile(e) {
     const file = e.target.files[0];

@@ -1,7 +1,7 @@
 import Cell from './Cell'
 import { STRAIGHT_COST } from './Cell'
-import { resetPath } from './Grid'
-import { drawPath } from './Draw'
+import { isSameNode } from './Grid'
+import { drawPath, resetPath } from './Draw'
 import { Alert } from './Draw'
 import PriorityQueue from './priority-queue'
 
@@ -16,6 +16,7 @@ export function aStar (start, goal) {
         if (lastPath.length > 0) {
             resetPath();
             lastPath = [];
+            drawOrder = [];
         }
         let counter = 0;
     
@@ -39,7 +40,7 @@ export function aStar (start, goal) {
             }
             let q = openSet[lowestF];
             //Check if the goal is reached
-            if(q.x == goal.x && q.y == goal.y) {
+            if(isSameNode(q, goal)) {
                 let curr = q.parent;
                 while(curr.x != start.x || curr.y != start.y){
                     curr.el = grid[curr.x][curr.y].el;
@@ -59,9 +60,10 @@ export function aStar (start, goal) {
 
             //Switch the cell to the closed list
             closedSet.push(q);
-            q.opened = false;
-            drawOrder.push(q);
-            
+            if (!isSameNode(q, start)) {
+                q.opened = false;
+                drawOrder.push(q); 
+            }  
             //Get the neighbors array of the current cell    
             let neighborsSet = neighbors(q);
             for(let i = 0; i < neighborsSet.length; i++) {
@@ -71,7 +73,8 @@ export function aStar (start, goal) {
                         neighborsSet[i].f = neighborsSet[i].g + neighborsSet[i].heuristic(goal);
                         openSet.push(neighborsSet[i]);
                         neighborsSet[i].opened = true;
-                        drawOrder.push(neighborsSet[i])
+                        if (!isSameNode(neighborsSet[i], start) && !isSameNode(neighborsSet[i], goal)) 
+                            drawOrder.push(neighborsSet[i]);
                     } else if (neighborsSet[i].g < openSet[index].g) {
                         neighborsSet[i].f = neighborsSet[i].g + neighborsSet[i].heuristic(goal);
                         openSet[index] = neighborsSet[i];
@@ -127,9 +130,7 @@ function indexOfNode(array, node) {
 }
 
 
-
-
-//In case
+// For diagonal movement
 
 // function neighbors(node) {
 // 	let neighbors = [];

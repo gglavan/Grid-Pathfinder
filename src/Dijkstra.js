@@ -1,6 +1,5 @@
-import {resetPath} from './Grid'
-import {drawPath} from './Draw'
-import {Alert} from './Draw'
+import { drawPath, resetPath } from './Draw'
+import { Alert } from './Draw'
 import Cell from './Cell'
 import PriorityQueue from './priority-queue'
 

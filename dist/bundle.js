@@ -108,8 +108,13 @@ const STRAIGHT_COST = 1;
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["c"] = drawPath;
-/* harmony export (immutable) */ __webpack_exports__["e"] = setObstacles;
+/* harmony export (immutable) */ __webpack_exports__["e"] = resetPath;
+/* harmony export (immutable) */ __webpack_exports__["f"] = setObstacles;
 /* harmony export (immutable) */ __webpack_exports__["d"] = isOnPath;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Grid__ = __webpack_require__(2);
+
+
+// Colors container
 const Color = {
 	openNode: "rgb(224, 242, 241)",
 	closedNode: "rgb(128, 203, 196)",
@@ -123,12 +128,22 @@ const Color = {
 /* harmony export (immutable) */ __webpack_exports__["b"] = Color;
 
 
-// Draw path
+// Watch for the initial setup
+const Alert = {
+	start: () => Materialize.toast('Please set the initial spot!', 1500, 'red darken-1'),
+	goal: () => Materialize.toast('Please set the finish spot!', 1500, 'red darken-1'),
+	both: () => Materialize.toast('Please set the initial spots!', 1500, 'red darken-1'),
+	notFound: () => Materialize.toast('Path not found!', 1500, 'red darken-1')
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Alert;
+
+
+// Async function to draw the path
 async function drawPath (drawOrder, lastPath) {
     if (lastPath.length) {
-        for(let i = 1, len = drawOrder.length - 2; i < len; i++) {
-            grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor = drawOrder[i].opened ? Color.closedNode : Color.openNode;
-            await sleep(5);
+        for (let i = 0, len = drawOrder.length; i < len; i++) {
+			grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor = drawOrder[i].opened ? Color.closedNode : Color.openNode;
+			await sleep(5);
         }
         for(let i = lastPath.length - 1; i >= 0; i--) {
             lastPath[i].el.style.backgroundColor = Color.path;
@@ -138,11 +153,27 @@ async function drawPath (drawOrder, lastPath) {
     }
 }
 
-function sleep(ms) {
+// Reset the path
+function resetPath() {
+    for (let i = 0; i < lastPath.length; i++) {
+        if (lastPath[i].el.style.backgroundColor == Color.path) {
+            lastPath[i].el.style.backgroundColor = Color.clearNode;
+            lastPath[i].el.style.border = Color.nodeBorder;
+        } 
+	}
+	for (let i = 0; i < drawOrder.length; i++) {
+		if (grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor == Color.openNode || 
+			grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor === Color.closedNode)
+				grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor = Color.clearNode;
+    }
+}
+
+// Implemented artificial sleep for async to work
+function sleep (ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-//Set obstacles
+// Generate the desired amount of obstacles
 function setObstacles() {
 	const obst = 1000;
 	let arr = [];
@@ -164,26 +195,15 @@ function setObstacles() {
 		i++;
 	}
 }
-//Check if the obstacle is on path
-function isOnPath(curr) {
-	let isOn = false;
-	lastPath.forEach(cell => {
-		if (cell.x == curr.x && cell.y == curr.y) {
-			isOn = true; 
-			return isOn;
-		}
-	});
-	return isOn;
-}
-//Watch for the initial setup
-const Alert = {
-	start: () => Materialize.toast('Please set the initial spot!', 1500, 'red darken-1'),
-	goal: () => Materialize.toast('Please set the finish spot!', 1500, 'red darken-1'),
-	both: () => Materialize.toast('Please set the initial spots!', 1500, 'red darken-1'),
-	notFound: () => Materialize.toast('Path not found!', 1500, 'red darken-1')
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = Alert;
 
+// Check if the obstacle is on path
+function isOnPath(curr) {
+	for (let i = 0, len = lastPath.length; i < len; i++) {
+		if (Object(__WEBPACK_IMPORTED_MODULE_0__Grid__["c" /* isSameNode */])(lastPath[i], curr))
+			return true;
+	}
+	return false;
+}
 
 
 /***/ }),
@@ -192,8 +212,8 @@ const Alert = {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["b"] = initGrid;
-/* harmony export (immutable) */ __webpack_exports__["c"] = resetPath;
 /* harmony export (immutable) */ __webpack_exports__["a"] = clearGrid;
+/* harmony export (immutable) */ __webpack_exports__["c"] = isSameNode;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Cell__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Draw__ = __webpack_require__(1);
 
@@ -211,7 +231,7 @@ function adjustSize () {
     w = Math.floor(document.body.clientWidth / __WEBPACK_IMPORTED_MODULE_0__Cell__["b" /* cellSize */]); 
 }
 
-function initGrid() {
+function initGrid () {
     adjustSize();
     const target = document.getElementById("grid");
     grid = new Array(h);
@@ -220,7 +240,7 @@ function initGrid() {
         for(let j = 0; j < w; j++) {
             const el = document.createElement("div");
             el.className = "cell";
-            grid[i][j] = new __WEBPACK_IMPORTED_MODULE_0__Cell__["c" /* default */](i,j,el);
+            grid[i][j] = new __WEBPACK_IMPORTED_MODULE_0__Cell__["c" /* default */](i, j, el);
             grid[i][j].el.style.width = __WEBPACK_IMPORTED_MODULE_0__Cell__["b" /* cellSize */] + "px";
             grid[i][j].el.style.height = __WEBPACK_IMPORTED_MODULE_0__Cell__["b" /* cellSize */] + "px";
             target.appendChild(grid[i][j].el);
@@ -228,22 +248,7 @@ function initGrid() {
     }
 }
 
-function resetPath() {
-    for(let i = 0; i < lastPath.length; i++) {
-        if(lastPath[i].el.style.backgroundColor == __WEBPACK_IMPORTED_MODULE_1__Draw__["b" /* Color */].path) {
-            lastPath[i].el.style.backgroundColor = __WEBPACK_IMPORTED_MODULE_1__Draw__["b" /* Color */].clearNode;
-            lastPath[i].el.style.border = __WEBPACK_IMPORTED_MODULE_1__Draw__["b" /* Color */].nodeBorder;
-        } 
-    }
-    for(let i = 0; i < drawOrder.length; i++) {
-        if(drawOrder[i].el.style.backgroundColor == __WEBPACK_IMPORTED_MODULE_1__Draw__["b" /* Color */].openNode || drawOrder[i].el.style.backgroundColor == __WEBPACK_IMPORTED_MODULE_1__Draw__["b" /* Color */].closedNode) {
-            grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor = __WEBPACK_IMPORTED_MODULE_1__Draw__["b" /* Color */].clearNode;
-            grid[drawOrder[i].x][drawOrder[i].y].el.style.border = __WEBPACK_IMPORTED_MODULE_1__Draw__["b" /* Color */].nodeBorder;
-        } 
-    }
-}
-
-function clearGrid() {
+function clearGrid () {
     for(let i = 0; i < h; i++) {
         for(let j = 0; j < w; j++) {
             grid[i][j].obstacle = false;
@@ -252,7 +257,10 @@ function clearGrid() {
             goal = start = undefined;
         }
     }
+}
 
+function isSameNode (nodeA, nodeB) {
+    return nodeA.x == nodeB.x && nodeA.y == nodeB.y;
 }
 
 /***/ }),
@@ -681,15 +689,15 @@ window.onload = Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["b" /* initGrid */])(
 document.getElementById("grid").addEventListener("click",function(e){
 	if(document.getElementById("start").checked == true){
 		if(lastStart !== undefined) {
-			if(lastStart.obstacle == false && lastStart.style.backgroundColor == "rgb(147, 202, 59)") {
-				lastStart.style.backgroundColor = "white";
-				lastStart.style.border = "1px solid #E6E6E6";
+			if(lastStart.obstacle == false && lastStart.style.backgroundColor == __WEBPACK_IMPORTED_MODULE_4__Draw__["b" /* Color */].start) {
+				lastStart.style.backgroundColor = __WEBPACK_IMPORTED_MODULE_4__Draw__["b" /* Color */].clearNode;
+				lastStart.style.border = __WEBPACK_IMPORTED_MODULE_4__Draw__["b" /* Color */].nodeBorder;
 			}
-			Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["c" /* resetPath */])();
+			Object(__WEBPACK_IMPORTED_MODULE_4__Draw__["e" /* resetPath */])();
 		}
 		lastStart = e.target;
-		lastStart.style.backgroundColor = "#93CA3B";
-		lastStart.style.border = "0";
+		lastStart.style.backgroundColor = __WEBPACK_IMPORTED_MODULE_4__Draw__["b" /* Color */].start;
+		lastStart.style.border = "none";
 		for(let i = 0; i < h; i++) {
 			for(let j = 0; j < w; j++) {
 				if(grid[i][j].el == lastStart){
@@ -701,15 +709,15 @@ document.getElementById("grid").addEventListener("click",function(e){
 		}
 	} else if(document.getElementById("stop").checked == true){
 		if(lastStop !== undefined) {
-			if(lastStop.obstacle == false && lastStop.style.backgroundColor == "rgb(235, 73, 96)") {
-				lastStop.style.backgroundColor = "white";
-				lastStop.style.border = "1px solid #E6E6E6";      
+			if(lastStop.obstacle == false && lastStop.style.backgroundColor == __WEBPACK_IMPORTED_MODULE_4__Draw__["b" /* Color */].goal) {
+				lastStop.style.backgroundColor = __WEBPACK_IMPORTED_MODULE_4__Draw__["b" /* Color */].clearNode;
+				lastStop.style.border = __WEBPACK_IMPORTED_MODULE_4__Draw__["b" /* Color */].nodeBorder;      
 			}
-			Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["c" /* resetPath */])();
+			Object(__WEBPACK_IMPORTED_MODULE_4__Draw__["e" /* resetPath */])();
 		} 
 		lastStop = e.target;
-		lastStop.style.backgroundColor = "#EB4960";
-		lastStop.style.border = "0";
+		lastStop.style.backgroundColor = __WEBPACK_IMPORTED_MODULE_4__Draw__["b" /* Color */].goal;
+		lastStop.style.border = "none";
 		lastStop.obstacle = false;
 		for(let i = 0; i < h; i++) {
 			for(let j = 0; j < w; j++) {
@@ -721,28 +729,28 @@ document.getElementById("grid").addEventListener("click",function(e){
 		}
 	} else if(document.getElementById("obst").checked == true) {
 		let spot = e.target;
-		spot.style.backgroundColor = "#808080";
-		spot.style.border = "0";
+		spot.style.backgroundColor = __WEBPACK_IMPORTED_MODULE_4__Draw__["b" /* Color */].obstacle;
+		spot.style.border = "none";
 		for(let i = 0; i < h; i++) {
 			for(let j = 0; j < w; j++) {
 				if(grid[i][j].el == spot && grid[i][j].obstacle == false){
 					grid[i][j].obstacle = true;
 					if(grid[i][j] == goal) {
 						goal = undefined;
-						Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["c" /* resetPath */])();
+						Object(__WEBPACK_IMPORTED_MODULE_4__Draw__["e" /* resetPath */])();
 					}else if(grid[i][j] == start) {
 						start = undefined;
-						Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["c" /* resetPath */])();
+						Object(__WEBPACK_IMPORTED_MODULE_4__Draw__["e" /* resetPath */])();
 					}
 					if(Object(__WEBPACK_IMPORTED_MODULE_4__Draw__["d" /* isOnPath */])(grid[i][j])) {
-						Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["c" /* resetPath */])();
+						Object(__WEBPACK_IMPORTED_MODULE_4__Draw__["e" /* resetPath */])();
 						Object(__WEBPACK_IMPORTED_MODULE_2__A_Star__["a" /* aStar */])(start, goal);
 					}
 				} else if(grid[i][j].el == spot && grid[i][j].obstacle == true){
 					goal = undefined;
 					grid[i][j].obstacle = false;
-					grid[i][j].el.style.backgroundColor = "white";
-					grid[i][j].el.style.border = "1px solid #E6E6E6";
+					grid[i][j].el.style.backgroundColor = __WEBPACK_IMPORTED_MODULE_4__Draw__["b" /* Color */].clearNode;
+					grid[i][j].el.style.border = __WEBPACK_IMPORTED_MODULE_4__Draw__["b" /* Color */].nodeBorder;
 				}
 			}
 		}
@@ -760,41 +768,13 @@ function runAlgorithm(){
 }
 
 document.getElementById('generatePathBtn').addEventListener('click', runAlgorithm);
-document.getElementById('addObstacles').addEventListener('click', __WEBPACK_IMPORTED_MODULE_4__Draw__["e" /* setObstacles */]);
+document.getElementById('addObstacles').addEventListener('click', __WEBPACK_IMPORTED_MODULE_4__Draw__["f" /* setObstacles */]);
 document.getElementById('clearGrid').addEventListener('click', __WEBPACK_IMPORTED_MODULE_1__Grid__["a" /* clearGrid */]);
 document.getElementById('saveGrid').addEventListener('click', __WEBPACK_IMPORTED_MODULE_5__File__["b" /* saveGrid */]);
 document.getElementById('myFile').addEventListener('change', __WEBPACK_IMPORTED_MODULE_5__File__["a" /* readFile */], false);
 document.getElementById('getFile').onclick = function() {
     document.getElementById('myFile').click();
 };
-
-
-
-// $('#grid').on('mousedown mouseup', function mouseState(e) {
-//     if (e.type == "mousedown") {
-// 		document.getElementById('grid').addEventListener('mouseover',(e) => {
-// 			let x = Math.floor(e.clientX / cellSize);
-// 			let y = Math.floor(e.clientY / cellSize); 
-// 			drawCell(y,x);
-// 			if(e.type == "mouseup") {
-// 				alert("realeased")
-// 			}
-// 		});			
-// 	}
-		
-					// if(grid[i][j] == goal) {
-					// 	goal = undefined;
-					// 	resetPath();
-					// }else if(grid[i][j] == start) {
-					// 	start = undefined;
-					// 	resetPath();
-					// }
-		// if(e.type == 'mousedown') {
-			// document.getElementById('grid').removeEventListener('mouseover', mouseState, true)
-		// 	console.log("asdas");
-		// }
-// });
-
 
 window.addEventListener('keyup',(e)=>{
 	if(e.keyCode == 81 || e.keyCode == 113) {
@@ -806,9 +786,6 @@ window.addEventListener('keyup',(e)=>{
 	}
 });
 
-function drawCell(x, y) {
-	grid[x][y].el.style.backgroundColor = "black";
-}
 
 
 
@@ -869,8 +846,9 @@ function aStar (start, goal) {
         __WEBPACK_IMPORTED_MODULE_2__Draw__["a" /* Alert */].goal();
     } else {
         if (lastPath.length > 0) {
-            Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["c" /* resetPath */])();
+            Object(__WEBPACK_IMPORTED_MODULE_2__Draw__["e" /* resetPath */])();
             lastPath = [];
+            drawOrder = [];
         }
         let counter = 0;
     
@@ -894,7 +872,7 @@ function aStar (start, goal) {
             }
             let q = openSet[lowestF];
             //Check if the goal is reached
-            if(q.x == goal.x && q.y == goal.y) {
+            if(Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["c" /* isSameNode */])(q, goal)) {
                 let curr = q.parent;
                 while(curr.x != start.x || curr.y != start.y){
                     curr.el = grid[curr.x][curr.y].el;
@@ -914,9 +892,10 @@ function aStar (start, goal) {
 
             //Switch the cell to the closed list
             closedSet.push(q);
-            q.opened = false;
-            drawOrder.push(q);
-            
+            if (!Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["c" /* isSameNode */])(q, start)) {
+                q.opened = false;
+                drawOrder.push(q); 
+            }  
             //Get the neighbors array of the current cell    
             let neighborsSet = neighbors(q);
             for(let i = 0; i < neighborsSet.length; i++) {
@@ -926,7 +905,8 @@ function aStar (start, goal) {
                         neighborsSet[i].f = neighborsSet[i].g + neighborsSet[i].heuristic(goal);
                         openSet.push(neighborsSet[i]);
                         neighborsSet[i].opened = true;
-                        drawOrder.push(neighborsSet[i])
+                        if (!Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["c" /* isSameNode */])(neighborsSet[i], start) && !Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["c" /* isSameNode */])(neighborsSet[i], goal)) 
+                            drawOrder.push(neighborsSet[i]);
                     } else if (neighborsSet[i].g < openSet[index].g) {
                         neighborsSet[i].f = neighborsSet[i].g + neighborsSet[i].heuristic(goal);
                         openSet[index] = neighborsSet[i];
@@ -982,9 +962,7 @@ function indexOfNode(array, node) {
 }
 
 
-
-
-//In case
+// For diagonal movement
 
 // function neighbors(node) {
 // 	let neighbors = [];
@@ -1017,12 +995,10 @@ function indexOfNode(array, node) {
 
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = dijkstra;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Grid__ = __webpack_require__(2);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Draw__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Cell__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__priority_queue__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__priority_queue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__priority_queue__);
-
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Draw__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Cell__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__priority_queue__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__priority_queue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__priority_queue__);
 
 
 
@@ -1035,27 +1011,27 @@ let diagonalDistance = 2;
 function dijkstra(start, goal) {
     let iteration = 0;
     if (start == undefined && goal == undefined) {
-        __WEBPACK_IMPORTED_MODULE_1__Draw__["a" /* Alert */].both();
+        __WEBPACK_IMPORTED_MODULE_0__Draw__["a" /* Alert */].both();
     } else if (start == undefined) {
-        __WEBPACK_IMPORTED_MODULE_1__Draw__["a" /* Alert */].start();
+        __WEBPACK_IMPORTED_MODULE_0__Draw__["a" /* Alert */].start();
     } else if (goal == undefined) {
-        __WEBPACK_IMPORTED_MODULE_1__Draw__["a" /* Alert */].goal();
+        __WEBPACK_IMPORTED_MODULE_0__Draw__["a" /* Alert */].goal();
     } else {
         let currentNode;
         let tempNode;
 
         if(lastPath.length > 0) {
-            Object(__WEBPACK_IMPORTED_MODULE_0__Grid__["c" /* resetPath */])();
+            Object(__WEBPACK_IMPORTED_MODULE_0__Draw__["e" /* resetPath */])();
             lastPath = []; 
         }
         let counter = 0;
         start.distance = 0;
 
-        var queue = new __WEBPACK_IMPORTED_MODULE_3__priority_queue___default.a({ comparator: function(a,  b) {return a.distance - b.distance}});
+        var queue = new __WEBPACK_IMPORTED_MODULE_2__priority_queue___default.a({ comparator: function(a,  b) {return a.distance - b.distance}});
         queue.queue(start);
         while(queue.length > 0){
             currentNode = queue.dequeue();
-            tempNode = new __WEBPACK_IMPORTED_MODULE_2__Cell__["c" /* default */](0, 0, currentNode.el);
+            tempNode = new __WEBPACK_IMPORTED_MODULE_1__Cell__["c" /* default */](0, 0, currentNode.el);
 
           // TOP
           if(currentNode.x - 1 >= 0){
@@ -1149,12 +1125,12 @@ function dijkstra(start, goal) {
                   lastPath.push(cNode);
                   cNode = cNode.parent;
               }
-              int = setInterval(__WEBPACK_IMPORTED_MODULE_1__Draw__["c" /* drawPath */], 5);
+              int = setInterval(__WEBPACK_IMPORTED_MODULE_0__Draw__["c" /* drawPath */], 5);
                 console.log("Min path length: " + lastPath.length);
                 console.log("Counter: " + counter);
               return;
           } else {
-              return __WEBPACK_IMPORTED_MODULE_1__Draw__["a" /* Alert */].notFound();
+              return __WEBPACK_IMPORTED_MODULE_0__Draw__["a" /* Alert */].notFound();
           }
      }
 }
@@ -1167,7 +1143,7 @@ function dijkstra(start, goal) {
 "use strict";
 /* harmony export (immutable) */ __webpack_exports__["a"] = readFile;
 /* harmony export (immutable) */ __webpack_exports__["b"] = saveGrid;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Grid__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Draw__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Cell__ = __webpack_require__(0);
 
 
@@ -1199,7 +1175,7 @@ function readFile(e) {
 }
   
 function displayContents(contents) {
-    Object(__WEBPACK_IMPORTED_MODULE_0__Grid__["c" /* resetPath */])();
+    Object(__WEBPACK_IMPORTED_MODULE_0__Draw__["e" /* resetPath */])();
     const lines = contents.split('\n');
     for(let i = 0; i < lines.length; i++){
         const currLine = lines[i].split('');
