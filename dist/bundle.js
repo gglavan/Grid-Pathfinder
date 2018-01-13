@@ -69,7 +69,7 @@
 
 "use strict";
 class Cell {
-	constructor (x, y, el) {
+	constructor(x, y, el) {
 		this.x = x;
 		this.y = y;
 		this.g = 0;
@@ -81,13 +81,13 @@ class Cell {
 		this.el = el;
 		this.parent;
 	}
-	heuristic (goal) {
+	heuristic(goal) {
 		const dx = Math.abs(this.x - goal.x);
 		const dy = Math.abs(this.y - goal.y);
 		// return dx + dy;
 		const dx2 = start.x - goal.x
 		const dy2 = start.y - goal.y
-		const cross = Math.abs(dx*dy2 - dx2*dy)
+		const cross = Math.abs(dx * dy2 - dx2 * dy)
 		return (dx + dy) + cross * 0.001;
 		// return 5 * (dx + dy) + (7 - 2 * 5) * Math.min(dx, dy);
 	}
@@ -140,45 +140,45 @@ const Alert = {
 
 
 // Async function to draw the path
-async function drawPath () {
-    if (lastPath.length) {
+async function drawPath() {
+	if (lastPath.length) {
 		const t0 = performance.now();
-        for (let i = 0, len = drawOrder.length; i < len; i++) {
+		for (let i = 0, len = drawOrder.length; i < len; i++) {
 			grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor = drawOrder[i].visited ? Color.closedNode : Color.openNode;
 			grid[drawOrder[i].x][drawOrder[i].y].distance = Number.MAX_SAFE_INTEGER;
 			await sleep(5);
-        }
-        for (let i = lastPath.length - 1; i >= 0; i--) {
-            lastPath[i].el.style.backgroundColor = Color.path;
-		    lastPath[i].el.style.border = "none";
-            await sleep(5);
+		}
+		for (let i = lastPath.length - 1; i >= 0; i--) {
+			lastPath[i].el.style.backgroundColor = Color.path;
+			lastPath[i].el.style.border = "none";
+			await sleep(5);
 		}
 		const t1 = performance.now();
 		let visitedNodes = 0;
 		for (let i = 0; i < h; i++) {
 			for (let j = 0; j < w; j++) {
-				if(grid[i][j].el.style.backgroundColor == Color.closedNode ||
-				   grid[i][j].el.style.backgroundColor == Color.openNode ||
-				   grid[i][j].el.style.backgroundColor == Color.path)
-				   visitedNodes++;
+				if (grid[i][j].el.style.backgroundColor == Color.closedNode ||
+					grid[i][j].el.style.backgroundColor == Color.openNode ||
+					grid[i][j].el.style.backgroundColor == Color.path)
+					visitedNodes++;
 			}
 		}
 		Alert.pathInfo(visitedNodes, lastPath.length, ((t1 - t0) / 1000).toFixed(2));
-    }
+	}
 }
 
 // Reset the path
 function resetPath() {
-    for (let i = 0; i < lastPath.length; i++) {
-        if (lastPath[i].el.style.backgroundColor == Color.path) {
-            lastPath[i].el.style.backgroundColor = Color.clearNode;
+	for (let i = 0; i < lastPath.length; i++) {
+		if (lastPath[i].el.style.backgroundColor == Color.path) {
+			lastPath[i].el.style.backgroundColor = Color.clearNode;
 			lastPath[i].el.style.border = Color.nodeBorder;
-        } 
+		}
 	}
 	for (let i = 0; i < drawOrder.length; i++) {
-		if (grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor == Color.openNode || 
+		if (grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor == Color.openNode ||
 			grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor === Color.closedNode)
-				grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor = Color.clearNode;
+			grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor = Color.clearNode;
 	}
 	// console.log(start, goal)
 	// goal.distance = Number.MAX_SAFE_INTEGER;
@@ -186,8 +186,8 @@ function resetPath() {
 }
 
 // Implemented artificial sleep for async to work
-function sleep (ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+function sleep(ms) {
+	return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 // Generate the desired amount of obstacles
@@ -222,7 +222,6 @@ function isOnPath(curr) {
 	return false;
 }
 
-
 /***/ }),
 /* 2 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
@@ -237,47 +236,47 @@ function isOnPath(curr) {
 
 
 
-function adjustSize () {
+function adjustSize() {
 	const exc = document.getElementById("menu").clientHeight;
 	const gridZone = document.getElementById("grid");
 	let hgt = document.body.clientHeight - exc;
-	hgt -=	hgt % __WEBPACK_IMPORTED_MODULE_0__Cell__["b" /* cellSize */];
-    hgt += __WEBPACK_IMPORTED_MODULE_0__Cell__["b" /* cellSize */];
-    gridZone.style.height =	hgt + "px";
+	hgt -= hgt % __WEBPACK_IMPORTED_MODULE_0__Cell__["b" /* cellSize */];
+	hgt += __WEBPACK_IMPORTED_MODULE_0__Cell__["b" /* cellSize */];
+	gridZone.style.height = hgt + "px";
 	h = hgt / __WEBPACK_IMPORTED_MODULE_0__Cell__["b" /* cellSize */];
-    w = Math.floor(document.body.clientWidth / __WEBPACK_IMPORTED_MODULE_0__Cell__["b" /* cellSize */]); 
+	w = Math.floor(document.body.clientWidth / __WEBPACK_IMPORTED_MODULE_0__Cell__["b" /* cellSize */]);
 }
 
-function initGrid () {
-    adjustSize();
-    const target = document.getElementById("grid");
-    grid = new Array(h);
-    for(let i = 0; i < h; i++) {
-        grid[i] = new Array(w);
-        for(let j = 0; j < w; j++) {
-            const el = document.createElement("div");
-            el.className = "cell";
-            grid[i][j] = new __WEBPACK_IMPORTED_MODULE_0__Cell__["c" /* default */](i, j, el);
-            grid[i][j].el.style.width = __WEBPACK_IMPORTED_MODULE_0__Cell__["b" /* cellSize */] + "px";
-            grid[i][j].el.style.height = __WEBPACK_IMPORTED_MODULE_0__Cell__["b" /* cellSize */] + "px";
-            target.appendChild(grid[i][j].el);
-        }
-    }
+function initGrid() {
+	adjustSize();
+	const target = document.getElementById("grid");
+	grid = new Array(h);
+	for (let i = 0; i < h; i++) {
+		grid[i] = new Array(w);
+		for (let j = 0; j < w; j++) {
+			const el = document.createElement("div");
+			el.className = "cell";
+			grid[i][j] = new __WEBPACK_IMPORTED_MODULE_0__Cell__["c" /* default */](i, j, el);
+			grid[i][j].el.style.width = __WEBPACK_IMPORTED_MODULE_0__Cell__["b" /* cellSize */] + "px";
+			grid[i][j].el.style.height = __WEBPACK_IMPORTED_MODULE_0__Cell__["b" /* cellSize */] + "px";
+			target.appendChild(grid[i][j].el);
+		}
+	}
 }
 
-function clearGrid () {
-    for(let i = 0; i < h; i++) {
-        for(let j = 0; j < w; j++) {
-            grid[i][j].obstacle = false;
-            grid[i][j].el.style.backgroundColor = __WEBPACK_IMPORTED_MODULE_1__Draw__["b" /* Color */].clearNode;
-            grid[i][j].el.style.border = __WEBPACK_IMPORTED_MODULE_1__Draw__["b" /* Color */].border;
-            goal = start = undefined;
-        }
-    }
+function clearGrid() {
+	for (let i = 0; i < h; i++) {
+		for (let j = 0; j < w; j++) {
+			grid[i][j].obstacle = false;
+			grid[i][j].el.style.backgroundColor = __WEBPACK_IMPORTED_MODULE_1__Draw__["b" /* Color */].clearNode;
+			grid[i][j].el.style.border = __WEBPACK_IMPORTED_MODULE_1__Draw__["b" /* Color */].border;
+			goal = start = undefined;
+		}
+	}
 }
 
-function isSameNode (nodeA, nodeB) {
-    return nodeA.x == nodeB.x && nodeA.y == nodeB.y;
+function isSameNode(nodeA, nodeB) {
+	return nodeA.x == nodeB.x && nodeA.y == nodeB.y;
 }
 
 /***/ }),
@@ -703,10 +702,10 @@ global.goal = undefined;
 
 window.onload = Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["b" /* initGrid */])();
 
-document.getElementById("grid").addEventListener("click",function(e) {
-	if(document.getElementById("start").checked == true){
-		if(lastStart !== undefined) {
-			if(lastStart.obstacle == false && lastStart.style.backgroundColor == __WEBPACK_IMPORTED_MODULE_4__Draw__["b" /* Color */].start) {
+document.getElementById("grid").addEventListener("click", function (e) {
+	if (document.getElementById("start").checked == true) {
+		if (lastStart !== undefined) {
+			if (lastStart.obstacle == false && lastStart.style.backgroundColor == __WEBPACK_IMPORTED_MODULE_4__Draw__["b" /* Color */].start) {
 				lastStart.style.backgroundColor = __WEBPACK_IMPORTED_MODULE_4__Draw__["b" /* Color */].clearNode;
 				lastStart.style.border = __WEBPACK_IMPORTED_MODULE_4__Draw__["b" /* Color */].nodeBorder;
 			}
@@ -716,54 +715,54 @@ document.getElementById("grid").addEventListener("click",function(e) {
 		lastStart.style.backgroundColor = __WEBPACK_IMPORTED_MODULE_4__Draw__["b" /* Color */].start;
 		lastStart.style.border = "none";
 		lastStart.obstacle = false;
-		for(let i = 0; i < h; i++) {
-			for(let j = 0; j < w; j++) {
-				if(grid[i][j].el == lastStart){
+		for (let i = 0; i < h; i++) {
+			for (let j = 0; j < w; j++) {
+				if (grid[i][j].el == lastStart) {
 					start = grid[i][j];
 					start.obstacle = false;
 				}
 			}
 		}
-	} else if(document.getElementById("stop").checked == true){
-		if(lastStop !== undefined) {
-			if(lastStop.obstacle == false && lastStop.style.backgroundColor == __WEBPACK_IMPORTED_MODULE_4__Draw__["b" /* Color */].goal) {
+	} else if (document.getElementById("stop").checked == true) {
+		if (lastStop !== undefined) {
+			if (lastStop.obstacle == false && lastStop.style.backgroundColor == __WEBPACK_IMPORTED_MODULE_4__Draw__["b" /* Color */].goal) {
 				lastStop.style.backgroundColor = __WEBPACK_IMPORTED_MODULE_4__Draw__["b" /* Color */].clearNode;
-				lastStop.style.border = __WEBPACK_IMPORTED_MODULE_4__Draw__["b" /* Color */].nodeBorder;      
+				lastStop.style.border = __WEBPACK_IMPORTED_MODULE_4__Draw__["b" /* Color */].nodeBorder;
 			}
 			Object(__WEBPACK_IMPORTED_MODULE_4__Draw__["e" /* resetPath */])();
-		} 
+		}
 		lastStop = e.target;
 		lastStop.style.backgroundColor = __WEBPACK_IMPORTED_MODULE_4__Draw__["b" /* Color */].goal;
 		lastStop.style.border = "none";
 		lastStop.obstacle = false;
-		for(let i = 0; i < h; i++) {
-			for(let j = 0; j < w; j++) {
-				if(grid[i][j].el == lastStop){
+		for (let i = 0; i < h; i++) {
+			for (let j = 0; j < w; j++) {
+				if (grid[i][j].el == lastStop) {
 					goal = grid[i][j];
 					goal.obstacle = false;
 				}
 			}
 		}
-	} else if(document.getElementById("obst").checked == true) {
+	} else if (document.getElementById("obst").checked == true) {
 		let spot = e.target;
 		spot.style.backgroundColor = __WEBPACK_IMPORTED_MODULE_4__Draw__["b" /* Color */].obstacle;
 		spot.style.border = "none";
-		for(let i = 0; i < h; i++) {
-			for(let j = 0; j < w; j++) {
-				if(grid[i][j].el == spot && grid[i][j].obstacle == false){
+		for (let i = 0; i < h; i++) {
+			for (let j = 0; j < w; j++) {
+				if (grid[i][j].el == spot && grid[i][j].obstacle == false) {
 					grid[i][j].obstacle = true;
-					if(grid[i][j] == goal) {
+					if (grid[i][j] == goal) {
 						goal = undefined;
 						Object(__WEBPACK_IMPORTED_MODULE_4__Draw__["e" /* resetPath */])();
-					}else if(grid[i][j] == start) {
+					} else if (grid[i][j] == start) {
 						start = undefined;
 						Object(__WEBPACK_IMPORTED_MODULE_4__Draw__["e" /* resetPath */])();
 					}
-					if(Object(__WEBPACK_IMPORTED_MODULE_4__Draw__["d" /* isOnPath */])(grid[i][j])) {
+					if (Object(__WEBPACK_IMPORTED_MODULE_4__Draw__["d" /* isOnPath */])(grid[i][j])) {
 						Object(__WEBPACK_IMPORTED_MODULE_4__Draw__["e" /* resetPath */])();
 						runAlgorithm();
 					}
-				} else if(grid[i][j].el == spot && grid[i][j].obstacle == true){
+				} else if (grid[i][j].el == spot && grid[i][j].obstacle == true) {
 					goal = undefined;
 					grid[i][j].obstacle = false;
 					grid[i][j].el.style.backgroundColor = __WEBPACK_IMPORTED_MODULE_4__Draw__["b" /* Color */].clearNode;
@@ -774,14 +773,13 @@ document.getElementById("grid").addEventListener("click",function(e) {
 	}
 });
 
-function runAlgorithm () {
-	// $('#toast-container').fadeOut();
+function runAlgorithm() {
 	const toastElement = $('.toast').first()[0];
-  	if(toastElement) toastElement.M_Toast.remove();;
-	if(document.getElementById('aStar').checked == true) {
+	if (toastElement) toastElement.M_Toast.remove();;
+	if (document.getElementById('aStar').checked == true) {
 		Object(__WEBPACK_IMPORTED_MODULE_2__A_Star__["a" /* aStar */])(start, goal);
 		console.log('A* selected.');
-	} else if(document.getElementById('Dijkstra').checked == true) {
+	} else if (document.getElementById('Dijkstra').checked == true) {
 		Object(__WEBPACK_IMPORTED_MODULE_3__Dijkstra__["a" /* dijkstra */])(start, goal);
 		console.log('Dijkstra selected.');
 	}
@@ -792,24 +790,19 @@ document.getElementById('addObstacles').addEventListener('click', __WEBPACK_IMPO
 document.getElementById('clearGrid').addEventListener('click', __WEBPACK_IMPORTED_MODULE_1__Grid__["a" /* clearGrid */]);
 document.getElementById('saveGrid').addEventListener('click', __WEBPACK_IMPORTED_MODULE_5__File__["b" /* saveGrid */]);
 document.getElementById('myFile').addEventListener('change', __WEBPACK_IMPORTED_MODULE_5__File__["a" /* readFile */], false);
-document.getElementById('getFile').onclick = function() {
-    document.getElementById('myFile').click();
+document.getElementById('getFile').onclick = function () {
+	document.getElementById('myFile').click();
 };
 
-window.addEventListener('keyup',(e)=>{
-	if(e.keyCode == 81 || e.keyCode == 113) {
-		if(document.getElementById('start').checked == true) {
+window.addEventListener('keyup', (e) => {
+	if (e.keyCode == 81 || e.keyCode == 113) {
+		if (document.getElementById('start').checked == true) {
 			document.getElementById('stop').checked = true;
 		} else {
 			document.getElementById('start').checked = true;
 		}
 	}
 });
-
-
-
-
-
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(5)))
 
 /***/ }),
@@ -854,129 +847,129 @@ module.exports = g;
 
 
 
-function aStar (start, goal) {
-    if (start == undefined && goal == undefined) {
-        __WEBPACK_IMPORTED_MODULE_2__Draw__["a" /* Alert */].both();
-    } else if (start == undefined) {
-        __WEBPACK_IMPORTED_MODULE_2__Draw__["a" /* Alert */].start();
-    } else if (goal == undefined) {
-        __WEBPACK_IMPORTED_MODULE_2__Draw__["a" /* Alert */].goal();
-    } else {
-        if (lastPath.length > 0) {
-            Object(__WEBPACK_IMPORTED_MODULE_2__Draw__["e" /* resetPath */])();
-            lastPath = [];
-            drawOrder = [];
-        }
-        let counter = 0;
-    
-        let closedSet = [];
-        let openSet = [];
-    
-        start.g = 0;
-        start.h = start.heuristic(goal);
-        start.f = start.g + start.h;
-        
-        // Push the start cell in the open list
-        openSet.push(start);
-        
-        while(openSet.length > 0) {
-            // Get the cell with the lowest score from the open list
-            let lowestF = 0;
-            for (let i = 0, len = openSet.length; i < len; i++) {
-                if (openSet[i].f < openSet[lowestF].f) {
-                    lowestF = i;
-                }
-            }
-            let q = openSet[lowestF];
+function aStar(start, goal) {
+	if (start == undefined && goal == undefined) {
+		__WEBPACK_IMPORTED_MODULE_2__Draw__["a" /* Alert */].both();
+	} else if (start == undefined) {
+		__WEBPACK_IMPORTED_MODULE_2__Draw__["a" /* Alert */].start();
+	} else if (goal == undefined) {
+		__WEBPACK_IMPORTED_MODULE_2__Draw__["a" /* Alert */].goal();
+	} else {
+		if (lastPath.length > 0) {
+			Object(__WEBPACK_IMPORTED_MODULE_2__Draw__["e" /* resetPath */])();
+			lastPath = [];
+			drawOrder = [];
+		}
+		let counter = 0;
 
-            // Check if the goal is reached
-            if(Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["c" /* isSameNode */])(q, goal)) {
-                let curr = q.parent;
-                while(curr.x != start.x || curr.y != start.y){
-                    curr.el = grid[curr.x][curr.y].el;
-                    lastPath.push(curr);
-                    curr = curr.parent;
-                }
-                Object(__WEBPACK_IMPORTED_MODULE_2__Draw__["c" /* drawPath */])(drawOrder, lastPath);
-                console.log("Min path length: " + lastPath.length);
-                console.log("Counter: " + counter);
-                console.log("openSet length: " + openSet.length)
-                console.log("closedSet length: " + closedSet.length)
-                return;
-            }
-            
-            // Pop the cell from the open set
-            openSet.splice(lowestF, 1);
+		let closedSet = [];
+		let openSet = [];
 
-            // Switch the cell to the closed list
-            closedSet.push(q);
-            if (!Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["c" /* isSameNode */])(q, start)) {
-                q.visited = false;
-                drawOrder.push(q); 
-            }  
-            // Get the neighbors array of the current cell    
-            let neighborsSet = neighbors(q);
-            for(let i = 0; i < neighborsSet.length; i++) {
-                if (indexOfNode(closedSet, neighborsSet[i]) === -1) {
-                    var index = indexOfNode(openSet, neighborsSet[i]);
-                    if (index === -1) {
-                        neighborsSet[i].f = neighborsSet[i].g + neighborsSet[i].heuristic(goal);
-                        openSet.push(neighborsSet[i]);
-                        neighborsSet[i].visited = true;
-                        if (!Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["c" /* isSameNode */])(neighborsSet[i], start) && !Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["c" /* isSameNode */])(neighborsSet[i], goal)) 
-                            drawOrder.push(neighborsSet[i]);
-                    } else if (neighborsSet[i].g < openSet[index].g) {
-                        neighborsSet[i].f = neighborsSet[i].g + neighborsSet[i].heuristic(goal);
-                        openSet[index] = neighborsSet[i];
-                    }
-                }
-            } 
-        }
-    return __WEBPACK_IMPORTED_MODULE_2__Draw__["a" /* Alert */].notFound();
-    }
+		start.g = 0;
+		start.h = start.heuristic(goal);
+		start.f = start.g + start.h;
+
+		// Push the start cell in the open list
+		openSet.push(start);
+
+		while (openSet.length > 0) {
+			// Get the cell with the lowest score from the open list
+			let lowestF = 0;
+			for (let i = 0, len = openSet.length; i < len; i++) {
+				if (openSet[i].f < openSet[lowestF].f) {
+					lowestF = i;
+				}
+			}
+			let q = openSet[lowestF];
+
+			// Check if the goal is reached
+			if (Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["c" /* isSameNode */])(q, goal)) {
+				let curr = q.parent;
+				while (curr.x != start.x || curr.y != start.y) {
+					curr.el = grid[curr.x][curr.y].el;
+					lastPath.push(curr);
+					curr = curr.parent;
+				}
+				Object(__WEBPACK_IMPORTED_MODULE_2__Draw__["c" /* drawPath */])(drawOrder, lastPath);
+				console.log("Min path length: " + lastPath.length);
+				console.log("Counter: " + counter);
+				console.log("openSet length: " + openSet.length)
+				console.log("closedSet length: " + closedSet.length)
+				return;
+			}
+
+			// Pop the cell from the open set
+			openSet.splice(lowestF, 1);
+
+			// Switch the cell to the closed list
+			closedSet.push(q);
+			if (!Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["c" /* isSameNode */])(q, start)) {
+				q.visited = false;
+				drawOrder.push(q);
+			}
+			// Get the neighbors array of the current cell    
+			let neighborsSet = neighbors(q);
+			for (let i = 0; i < neighborsSet.length; i++) {
+				if (indexOfNode(closedSet, neighborsSet[i]) === -1) {
+					var index = indexOfNode(openSet, neighborsSet[i]);
+					if (index === -1) {
+						neighborsSet[i].f = neighborsSet[i].g + neighborsSet[i].heuristic(goal);
+						openSet.push(neighborsSet[i]);
+						neighborsSet[i].visited = true;
+						if (!Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["c" /* isSameNode */])(neighborsSet[i], start) && !Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["c" /* isSameNode */])(neighborsSet[i], goal))
+							drawOrder.push(neighborsSet[i]);
+					} else if (neighborsSet[i].g < openSet[index].g) {
+						neighborsSet[i].f = neighborsSet[i].g + neighborsSet[i].heuristic(goal);
+						openSet[index] = neighborsSet[i];
+					}
+				}
+			}
+		}
+		return __WEBPACK_IMPORTED_MODULE_2__Draw__["a" /* Alert */].notFound();
+	}
 }
 
 // Generate the neighbors of the current cell
 function neighbors(node) {
 	let neighbors = [];
-    let i = node.x;
-    let j = node.y;
-    if (j > 0 && !grid[i][j - 1].obstacle) {
-        let newNode = new __WEBPACK_IMPORTED_MODULE_0__Cell__["c" /* default */](i, j - 1, node.el);
-        newNode.g = node.g + __WEBPACK_IMPORTED_MODULE_0__Cell__["a" /* STRAIGHT_COST */];
-        newNode.parent = node;
-        neighbors.push(newNode);
-    }
-    if (j < w - 1 && !grid[i][j + 1].obstacle) {
-        let newNode = new __WEBPACK_IMPORTED_MODULE_0__Cell__["c" /* default */](i, j + 1, node.el);
-        newNode.g = node.g + __WEBPACK_IMPORTED_MODULE_0__Cell__["a" /* STRAIGHT_COST */];
-        newNode.parent = node;
-        neighbors.push(newNode);
-    }
-    
-    if (i > 0 && !grid[i - 1][j].obstacle) {
-        let newNode = new __WEBPACK_IMPORTED_MODULE_0__Cell__["c" /* default */](i - 1, j, node.el);
-        newNode.g = node.g + __WEBPACK_IMPORTED_MODULE_0__Cell__["a" /* STRAIGHT_COST */];
-        newNode.parent = node;
-        neighbors.push(newNode);
-    }
-    if (i < h - 1 && !grid[i + 1][j].obstacle) {
-        let newNode = new __WEBPACK_IMPORTED_MODULE_0__Cell__["c" /* default */](i + 1, j, node.el);
-        newNode.g = node.g + __WEBPACK_IMPORTED_MODULE_0__Cell__["a" /* STRAIGHT_COST */];
-        newNode.parent = node;
-        neighbors.push(newNode);
-    }     
+	let i = node.x;
+	let j = node.y;
+	if (j > 0 && !grid[i][j - 1].obstacle) {
+		let newNode = new __WEBPACK_IMPORTED_MODULE_0__Cell__["c" /* default */](i, j - 1, node.el);
+		newNode.g = node.g + __WEBPACK_IMPORTED_MODULE_0__Cell__["a" /* STRAIGHT_COST */];
+		newNode.parent = node;
+		neighbors.push(newNode);
+	}
+	if (j < w - 1 && !grid[i][j + 1].obstacle) {
+		let newNode = new __WEBPACK_IMPORTED_MODULE_0__Cell__["c" /* default */](i, j + 1, node.el);
+		newNode.g = node.g + __WEBPACK_IMPORTED_MODULE_0__Cell__["a" /* STRAIGHT_COST */];
+		newNode.parent = node;
+		neighbors.push(newNode);
+	}
+
+	if (i > 0 && !grid[i - 1][j].obstacle) {
+		let newNode = new __WEBPACK_IMPORTED_MODULE_0__Cell__["c" /* default */](i - 1, j, node.el);
+		newNode.g = node.g + __WEBPACK_IMPORTED_MODULE_0__Cell__["a" /* STRAIGHT_COST */];
+		newNode.parent = node;
+		neighbors.push(newNode);
+	}
+	if (i < h - 1 && !grid[i + 1][j].obstacle) {
+		let newNode = new __WEBPACK_IMPORTED_MODULE_0__Cell__["c" /* default */](i + 1, j, node.el);
+		newNode.g = node.g + __WEBPACK_IMPORTED_MODULE_0__Cell__["a" /* STRAIGHT_COST */];
+		newNode.parent = node;
+		neighbors.push(newNode);
+	}
 	return neighbors;
 }
 
 
 function indexOfNode(array, node) {
-    for (let i = 0; i < array.length; i++) {
-      if (node.x == array[i].x && node.y == array[i].y) {
-        return i;
-      }
-    }
-    return -1;
+	for (let i = 0; i < array.length; i++) {
+		if (node.x == array[i].x && node.y == array[i].y) {
+			return i;
+		}
+	}
+	return -1;
 }
 
 
@@ -1002,11 +995,6 @@ function indexOfNode(array, node) {
 // 	return neighbors;
 // }
 
-
-
-  
-  
-
 /***/ }),
 /* 7 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
@@ -1027,103 +1015,105 @@ function indexOfNode(array, node) {
 
 let diagonalDistance = 2;
 
-function dijkstra (start, goal) {
-    if (start == undefined && goal == undefined) {
-        __WEBPACK_IMPORTED_MODULE_0__Draw__["a" /* Alert */].both();
-    } else if (start == undefined) {
-        __WEBPACK_IMPORTED_MODULE_0__Draw__["a" /* Alert */].start();
-    } else if (goal == undefined) {
-        __WEBPACK_IMPORTED_MODULE_0__Draw__["a" /* Alert */].goal();
-    } else {
-        let currentNode;
-        let tempNode;
-        if (lastPath.length > 0) {
-            Object(__WEBPACK_IMPORTED_MODULE_0__Draw__["e" /* resetPath */])();
-            lastPath = [];
-            drawOrder = [];  
-        }
-        goal.visited = false;
-	    goal.distance = Number.MAX_SAFE_INTEGER;
-	    start.distance = Number.MAX_SAFE_INTEGER;
-        start.visited = false;
-        console.log("NOW")
-        console.log(start, goal)
-        let counter = 0;
-        start.distance = 0;
-        let queue = new __WEBPACK_IMPORTED_MODULE_2__priority_queue___default.a({ comparator: (a, b) => a.distance - b.distance});
-        queue.queue(start);
-        
-        while (queue.length > 0) {
-            currentNode = queue.dequeue();
-            tempNode = new __WEBPACK_IMPORTED_MODULE_1__Cell__["c" /* default */](0, 0, currentNode.el);
-            if (!(goal.distance == Number.MAX_SAFE_INTEGER)) {
-                let cNode = grid[goal.x][goal.y].parent;
-                while (cNode.parent != null) {
-                    cNode.el = grid[cNode.x][cNode.y].el;
-                    lastPath.push(cNode);
-                    cNode = cNode.parent;
-                }
-                console.log("Min path length: " + lastPath.length);
-                console.log(drawOrder);
-                for (let i = 0, len = drawOrder.length; i < len; i++) {
-                    drawOrder[i].visited = false;
-                    grid[drawOrder[i].x][drawOrder[i].y].visited = false;
-                }
-                Object(__WEBPACK_IMPORTED_MODULE_0__Draw__["c" /* drawPath */])();
-                return;
-            }
+function dijkstra(start, goal) {
+	if (start == undefined && goal == undefined) {
+		__WEBPACK_IMPORTED_MODULE_0__Draw__["a" /* Alert */].both();
+	} else if (start == undefined) {
+		__WEBPACK_IMPORTED_MODULE_0__Draw__["a" /* Alert */].start();
+	} else if (goal == undefined) {
+		__WEBPACK_IMPORTED_MODULE_0__Draw__["a" /* Alert */].goal();
+	} else {
+		let currentNode;
+		let tempNode;
+		if (lastPath.length > 0) {
+			Object(__WEBPACK_IMPORTED_MODULE_0__Draw__["e" /* resetPath */])();
+			lastPath = [];
+			drawOrder = [];
+		}
+		goal.visited = false;
+		goal.distance = Number.MAX_SAFE_INTEGER;
+		start.distance = Number.MAX_SAFE_INTEGER;
+		start.visited = false;
+		console.log("NOW")
+		console.log(start, goal)
+		let counter = 0;
+		start.distance = 0;
+		let queue = new __WEBPACK_IMPORTED_MODULE_2__priority_queue___default.a({
+			comparator: (a, b) => a.distance - b.distance
+		});
+		queue.queue(start);
 
-            // TOP
-            if (currentNode.x - 1 >= 0) {
-                tempNode = grid[currentNode.x-1][currentNode.y];
-                if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + __WEBPACK_IMPORTED_MODULE_1__Cell__["a" /* STRAIGHT_COST */]) {
-                    tempNode.distance = currentNode.distance + __WEBPACK_IMPORTED_MODULE_1__Cell__["a" /* STRAIGHT_COST */];
-                    tempNode.parent = currentNode;
-                    if(!Object(__WEBPACK_IMPORTED_MODULE_3__Grid__["c" /* isSameNode */])(tempNode, start) && !Object(__WEBPACK_IMPORTED_MODULE_3__Grid__["c" /* isSameNode */])(tempNode, goal))
-                        drawOrder.push(tempNode);
-                    queue.queue(tempNode);
-                }
-            }
+		while (queue.length > 0) {
+			currentNode = queue.dequeue();
+			tempNode = new __WEBPACK_IMPORTED_MODULE_1__Cell__["c" /* default */](0, 0, currentNode.el);
+			if (!(goal.distance == Number.MAX_SAFE_INTEGER)) {
+				let cNode = grid[goal.x][goal.y].parent;
+				while (cNode.parent != null) {
+					cNode.el = grid[cNode.x][cNode.y].el;
+					lastPath.push(cNode);
+					cNode = cNode.parent;
+				}
+				console.log("Min path length: " + lastPath.length);
+				console.log(drawOrder);
+				for (let i = 0, len = drawOrder.length; i < len; i++) {
+					drawOrder[i].visited = false;
+					grid[drawOrder[i].x][drawOrder[i].y].visited = false;
+				}
+				Object(__WEBPACK_IMPORTED_MODULE_0__Draw__["c" /* drawPath */])();
+				return;
+			}
 
-            // LEFT
-            if (currentNode.y > 0) {
-                tempNode = grid[currentNode.x][currentNode.y - 1];
-                if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + __WEBPACK_IMPORTED_MODULE_1__Cell__["a" /* STRAIGHT_COST */]) {
-                    tempNode.distance = currentNode.distance + __WEBPACK_IMPORTED_MODULE_1__Cell__["a" /* STRAIGHT_COST */];
-                    tempNode.parent = currentNode;
-                    if(!Object(__WEBPACK_IMPORTED_MODULE_3__Grid__["c" /* isSameNode */])(tempNode, start) && !Object(__WEBPACK_IMPORTED_MODULE_3__Grid__["c" /* isSameNode */])(tempNode, goal))
-                        drawOrder.push(tempNode);
-                    queue.queue(tempNode);
-                }
-            }
+			// TOP
+			if (currentNode.x - 1 >= 0) {
+				tempNode = grid[currentNode.x - 1][currentNode.y];
+				if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + __WEBPACK_IMPORTED_MODULE_1__Cell__["a" /* STRAIGHT_COST */]) {
+					tempNode.distance = currentNode.distance + __WEBPACK_IMPORTED_MODULE_1__Cell__["a" /* STRAIGHT_COST */];
+					tempNode.parent = currentNode;
+					if (!Object(__WEBPACK_IMPORTED_MODULE_3__Grid__["c" /* isSameNode */])(tempNode, start) && !Object(__WEBPACK_IMPORTED_MODULE_3__Grid__["c" /* isSameNode */])(tempNode, goal))
+						drawOrder.push(tempNode);
+					queue.queue(tempNode);
+				}
+			}
 
-            // RIGHT
-            if (currentNode.y + 1 < w) {
-                tempNode = grid[currentNode.x][currentNode.y + 1];
-                if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + __WEBPACK_IMPORTED_MODULE_1__Cell__["a" /* STRAIGHT_COST */]) {
-                    tempNode.distance = currentNode.distance + __WEBPACK_IMPORTED_MODULE_1__Cell__["a" /* STRAIGHT_COST */];
-                    tempNode.parent = currentNode;
-                    if(!Object(__WEBPACK_IMPORTED_MODULE_3__Grid__["c" /* isSameNode */])(tempNode, start) && !Object(__WEBPACK_IMPORTED_MODULE_3__Grid__["c" /* isSameNode */])(tempNode, goal))
-                        drawOrder.push(tempNode);
-                    queue.queue(tempNode);
-                }
-            }
-            // DOWN
-            if (currentNode.x + 1 < h) {
-                tempNode = grid[currentNode.x + 1][currentNode.y];
-                if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + __WEBPACK_IMPORTED_MODULE_1__Cell__["a" /* STRAIGHT_COST */]) {
-                    tempNode.distance = currentNode.distance + __WEBPACK_IMPORTED_MODULE_1__Cell__["a" /* STRAIGHT_COST */];
-                    tempNode.parent = currentNode;
-                    if(!Object(__WEBPACK_IMPORTED_MODULE_3__Grid__["c" /* isSameNode */])(tempNode, start) && !Object(__WEBPACK_IMPORTED_MODULE_3__Grid__["c" /* isSameNode */])(tempNode, goal))
-                        drawOrder.push(tempNode);
-                    queue.queue(tempNode);
-                }
-            }
-            // grid[currentNode.x][currentNode.y].visited = true;
-            currentNode.visited = true;
-        }
-        return __WEBPACK_IMPORTED_MODULE_0__Draw__["a" /* Alert */].notFound();
-    }
+			// LEFT
+			if (currentNode.y > 0) {
+				tempNode = grid[currentNode.x][currentNode.y - 1];
+				if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + __WEBPACK_IMPORTED_MODULE_1__Cell__["a" /* STRAIGHT_COST */]) {
+					tempNode.distance = currentNode.distance + __WEBPACK_IMPORTED_MODULE_1__Cell__["a" /* STRAIGHT_COST */];
+					tempNode.parent = currentNode;
+					if (!Object(__WEBPACK_IMPORTED_MODULE_3__Grid__["c" /* isSameNode */])(tempNode, start) && !Object(__WEBPACK_IMPORTED_MODULE_3__Grid__["c" /* isSameNode */])(tempNode, goal))
+						drawOrder.push(tempNode);
+					queue.queue(tempNode);
+				}
+			}
+
+			// RIGHT
+			if (currentNode.y + 1 < w) {
+				tempNode = grid[currentNode.x][currentNode.y + 1];
+				if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + __WEBPACK_IMPORTED_MODULE_1__Cell__["a" /* STRAIGHT_COST */]) {
+					tempNode.distance = currentNode.distance + __WEBPACK_IMPORTED_MODULE_1__Cell__["a" /* STRAIGHT_COST */];
+					tempNode.parent = currentNode;
+					if (!Object(__WEBPACK_IMPORTED_MODULE_3__Grid__["c" /* isSameNode */])(tempNode, start) && !Object(__WEBPACK_IMPORTED_MODULE_3__Grid__["c" /* isSameNode */])(tempNode, goal))
+						drawOrder.push(tempNode);
+					queue.queue(tempNode);
+				}
+			}
+			// DOWN
+			if (currentNode.x + 1 < h) {
+				tempNode = grid[currentNode.x + 1][currentNode.y];
+				if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + __WEBPACK_IMPORTED_MODULE_1__Cell__["a" /* STRAIGHT_COST */]) {
+					tempNode.distance = currentNode.distance + __WEBPACK_IMPORTED_MODULE_1__Cell__["a" /* STRAIGHT_COST */];
+					tempNode.parent = currentNode;
+					if (!Object(__WEBPACK_IMPORTED_MODULE_3__Grid__["c" /* isSameNode */])(tempNode, start) && !Object(__WEBPACK_IMPORTED_MODULE_3__Grid__["c" /* isSameNode */])(tempNode, goal))
+						drawOrder.push(tempNode);
+					queue.queue(tempNode);
+				}
+			}
+			// grid[currentNode.x][currentNode.y].visited = true;
+			currentNode.visited = true;
+		}
+		return __WEBPACK_IMPORTED_MODULE_0__Draw__["a" /* Alert */].notFound();
+	}
 }
 
 // For diagonal movement
@@ -1192,118 +1182,123 @@ function dijkstra (start, goal) {
 
 
 function readFile(e) {
-    const file = e.target.files[0];
-    if (!file) {
-      return;
-    }
-    if(file.type.includes("image")) {
-        const img = new Image();
-        const url = window.URL || window.webkitURL;
-        const src = url.createObjectURL(file);
-        img.src = src;
-        img.onload = () => {
-            draw(img);
-        };
-    } else {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const contents = e.target.result;
-            displayContents(contents);
-        };
-        reader.onerror = (evt) => {
-            alert(evt.target.error.name);
-        };
-        reader.readAsText(file);
-    }
+	const file = e.target.files[0];
+	if (!file) {
+		return;
+	}
+	if (file.type.includes("image")) {
+		const img = new Image();
+		const url = window.URL || window.webkitURL;
+		const src = url.createObjectURL(file);
+		img.src = src;
+		img.onload = () => {
+			draw(img);
+		};
+	} else {
+		const reader = new FileReader();
+		reader.onload = (e) => {
+			const contents = e.target.result;
+			displayContents(contents);
+		};
+		reader.onerror = (evt) => {
+			alert(evt.target.error.name);
+		};
+		reader.readAsText(file);
+	}
 }
-  
+
 function displayContents(contents) {
-    Object(__WEBPACK_IMPORTED_MODULE_0__Draw__["e" /* resetPath */])();
-    const lines = contents.split('\n');
-    for(let i = 0; i < lines.length; i++){
-        const currLine = lines[i].split('');
-        for(let j = 0; j < currLine.length; j++) {
-            if(currLine[j] == '1'){
-                grid[i][j].obstacle = true;
-                grid[i][j].el.style.backgroundColor = '#808080';
-                grid[i][j].el.style.border = "0";
-            }
-        }
-    }
+	Object(__WEBPACK_IMPORTED_MODULE_0__Draw__["e" /* resetPath */])();
+	const lines = contents.split('\n');
+	for (let i = 0; i < lines.length; i++) {
+		const currLine = lines[i].split('');
+		for (let j = 0; j < currLine.length; j++) {
+			if (currLine[j] == '1') {
+				grid[i][j].obstacle = true;
+				grid[i][j].el.style.backgroundColor = '#808080';
+				grid[i][j].el.style.border = "0";
+			}
+		}
+	}
 }
 
 function draw(img) {
-    const canvas = document.createElement('canvas');
-    canvas.width = img.width;
-    canvas.height = img.height;
-    canvas.display = 'none';
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0);
-    img.style.display = 'none';
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const data = imageData.data;
-    const h = imageData.height;  
-    const w = imageData.width;
-    let arrayLine = [];
-    let arrayMatrix = [];
-    let delimiter = 0;
-    for(let i = 0; i < data.length; i += 4) {
-        arrayLine.push({"r" : data[i], "g" : data[i + 1], "b" : data[i + 2], "a" : data[i + 3]});
-        delimiter++;
-        if(delimiter == w) {
-            arrayMatrix.push(arrayLine);
-            arrayLine = [];
-            delimiter = 0;
-        }
-    }
-    // console.log(arrayMatrix);
-    let filteredImage = "";
-    for(let i = 0; i < h - __WEBPACK_IMPORTED_MODULE_1__Cell__["b" /* cellSize */] + 1; i += __WEBPACK_IMPORTED_MODULE_1__Cell__["b" /* cellSize */]) {
-        for(let j = 0; j < w - __WEBPACK_IMPORTED_MODULE_1__Cell__["b" /* cellSize */] +1; j += __WEBPACK_IMPORTED_MODULE_1__Cell__["b" /* cellSize */]) {
-            let filter = 0;
-            for(let n = i; n < i + __WEBPACK_IMPORTED_MODULE_1__Cell__["b" /* cellSize */]; n++) {
-                for(let m = j; m < j + __WEBPACK_IMPORTED_MODULE_1__Cell__["b" /* cellSize */]; m++) {
-                    if(arrayMatrix[n][m].r / 255 <= 0.3 && arrayMatrix[n][m].g / 255 <= 0.3 && arrayMatrix[n][m].b / 255 <= 0.3) {
-                        filter++;
-                    }
-                }
-            }
-            if(filter >= __WEBPACK_IMPORTED_MODULE_1__Cell__["b" /* cellSize */]**2/2) {
-                filteredImage += '1'
-            } else filteredImage += '0'
-        }
-        filteredImage += '\n';
-    }
-    displayContents(filteredImage);
+	const canvas = document.createElement('canvas');
+	canvas.width = img.width;
+	canvas.height = img.height;
+	canvas.display = 'none';
+	const ctx = canvas.getContext('2d');
+	ctx.drawImage(img, 0, 0);
+	img.style.display = 'none';
+	const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+	const data = imageData.data;
+	const h = imageData.height;
+	const w = imageData.width;
+	let arrayLine = [];
+	let arrayMatrix = [];
+	let delimiter = 0;
+	for (let i = 0; i < data.length; i += 4) {
+		arrayLine.push({
+			"r": data[i],
+			"g": data[i + 1],
+			"b": data[i + 2],
+			"a": data[i + 3]
+		});
+		delimiter++;
+		if (delimiter == w) {
+			arrayMatrix.push(arrayLine);
+			arrayLine = [];
+			delimiter = 0;
+		}
+	}
+	// console.log(arrayMatrix);
+	let filteredImage = "";
+	for (let i = 0; i < h - __WEBPACK_IMPORTED_MODULE_1__Cell__["b" /* cellSize */] + 1; i += __WEBPACK_IMPORTED_MODULE_1__Cell__["b" /* cellSize */]) {
+		for (let j = 0; j < w - __WEBPACK_IMPORTED_MODULE_1__Cell__["b" /* cellSize */] + 1; j += __WEBPACK_IMPORTED_MODULE_1__Cell__["b" /* cellSize */]) {
+			let filter = 0;
+			for (let n = i; n < i + __WEBPACK_IMPORTED_MODULE_1__Cell__["b" /* cellSize */]; n++) {
+				for (let m = j; m < j + __WEBPACK_IMPORTED_MODULE_1__Cell__["b" /* cellSize */]; m++) {
+					if (arrayMatrix[n][m].r / 255 <= 0.3 && arrayMatrix[n][m].g / 255 <= 0.3 && arrayMatrix[n][m].b / 255 <= 0.3) {
+						filter++;
+					}
+				}
+			}
+			if (filter >= __WEBPACK_IMPORTED_MODULE_1__Cell__["b" /* cellSize */] ** 2 / 2) {
+				filteredImage += '1'
+			} else filteredImage += '0'
+		}
+		filteredImage += '\n';
+	}
+	displayContents(filteredImage);
 }
 
 
 function saveGrid() {
-    let textToSave = "";
-    for(let i = 0; i < h; i++) {
-        for(let j = 0; j < w; j++) {
-            if(grid[i][j].obstacle == true) textToSave += "1";
-            else textToSave += "0";
-        }
-        textToSave += "\r\n";
-    }
-    const textToSaveAsBlob = new Blob([textToSave], {type:"text/plain"});
-    const textToSaveAsURL = window.URL.createObjectURL(textToSaveAsBlob);
-    const fileNameToSaveAs = "savedGrid";
-    const downloadLink = document.createElement("a");
-    downloadLink.download = fileNameToSaveAs;
-    downloadLink.href = textToSaveAsURL;
-    downloadLink.onclick = destroyClickedElement;
-    downloadLink.style.display = "none";
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-} 
-
-function destroyClickedElement(event) {
-    document.body.removeChild(event.target);
+	let textToSave = "";
+	for (let i = 0; i < h; i++) {
+		for (let j = 0; j < w; j++) {
+			if (grid[i][j].obstacle == true) textToSave += "1";
+			else textToSave += "0";
+		}
+		textToSave += "\r\n";
+	}
+	const textToSaveAsBlob = new Blob([textToSave], {
+		type: "text/plain"
+	});
+	const textToSaveAsURL = window.URL.createObjectURL(textToSaveAsBlob);
+	const fileNameToSaveAs = "savedGrid";
+	const downloadLink = document.createElement("a");
+	downloadLink.download = fileNameToSaveAs;
+	downloadLink.href = textToSaveAsURL;
+	downloadLink.onclick = destroyClickedElement;
+	downloadLink.style.display = "none";
+	document.body.appendChild(downloadLink);
+	downloadLink.click();
 }
 
-
+function destroyClickedElement(event) {
+	document.body.removeChild(event.target);
+}
 
 /***/ })
 /******/ ]);

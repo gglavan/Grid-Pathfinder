@@ -22,45 +22,45 @@ export const Alert = {
 }
 
 // Async function to draw the path
-export async function drawPath () {
-    if (lastPath.length) {
+export async function drawPath() {
+	if (lastPath.length) {
 		const t0 = performance.now();
-        for (let i = 0, len = drawOrder.length; i < len; i++) {
+		for (let i = 0, len = drawOrder.length; i < len; i++) {
 			grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor = drawOrder[i].visited ? Color.closedNode : Color.openNode;
 			grid[drawOrder[i].x][drawOrder[i].y].distance = Number.MAX_SAFE_INTEGER;
 			await sleep(5);
-        }
-        for (let i = lastPath.length - 1; i >= 0; i--) {
-            lastPath[i].el.style.backgroundColor = Color.path;
-		    lastPath[i].el.style.border = "none";
-            await sleep(5);
+		}
+		for (let i = lastPath.length - 1; i >= 0; i--) {
+			lastPath[i].el.style.backgroundColor = Color.path;
+			lastPath[i].el.style.border = "none";
+			await sleep(5);
 		}
 		const t1 = performance.now();
 		let visitedNodes = 0;
 		for (let i = 0; i < h; i++) {
 			for (let j = 0; j < w; j++) {
-				if(grid[i][j].el.style.backgroundColor == Color.closedNode ||
-				   grid[i][j].el.style.backgroundColor == Color.openNode ||
-				   grid[i][j].el.style.backgroundColor == Color.path)
-				   visitedNodes++;
+				if (grid[i][j].el.style.backgroundColor == Color.closedNode ||
+					grid[i][j].el.style.backgroundColor == Color.openNode ||
+					grid[i][j].el.style.backgroundColor == Color.path)
+					visitedNodes++;
 			}
 		}
 		Alert.pathInfo(visitedNodes, lastPath.length, ((t1 - t0) / 1000).toFixed(2));
-    }
+	}
 }
 
 // Reset the path
 export function resetPath() {
-    for (let i = 0; i < lastPath.length; i++) {
-        if (lastPath[i].el.style.backgroundColor == Color.path) {
-            lastPath[i].el.style.backgroundColor = Color.clearNode;
+	for (let i = 0; i < lastPath.length; i++) {
+		if (lastPath[i].el.style.backgroundColor == Color.path) {
+			lastPath[i].el.style.backgroundColor = Color.clearNode;
 			lastPath[i].el.style.border = Color.nodeBorder;
-        } 
+		}
 	}
 	for (let i = 0; i < drawOrder.length; i++) {
-		if (grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor == Color.openNode || 
+		if (grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor == Color.openNode ||
 			grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor === Color.closedNode)
-				grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor = Color.clearNode;
+			grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor = Color.clearNode;
 	}
 	// console.log(start, goal)
 	// goal.distance = Number.MAX_SAFE_INTEGER;
@@ -68,8 +68,8 @@ export function resetPath() {
 }
 
 // Implemented artificial sleep for async to work
-function sleep (ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+function sleep(ms) {
+	return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 // Generate the desired amount of obstacles

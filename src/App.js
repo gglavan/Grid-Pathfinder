@@ -17,10 +17,10 @@ global.goal = undefined;
 
 window.onload = initGrid();
 
-document.getElementById("grid").addEventListener("click",function(e) {
-	if(document.getElementById("start").checked == true){
-		if(lastStart !== undefined) {
-			if(lastStart.obstacle == false && lastStart.style.backgroundColor == Color.start) {
+document.getElementById("grid").addEventListener("click", function (e) {
+	if (document.getElementById("start").checked == true) {
+		if (lastStart !== undefined) {
+			if (lastStart.obstacle == false && lastStart.style.backgroundColor == Color.start) {
 				lastStart.style.backgroundColor = Color.clearNode;
 				lastStart.style.border = Color.nodeBorder;
 			}
@@ -30,54 +30,54 @@ document.getElementById("grid").addEventListener("click",function(e) {
 		lastStart.style.backgroundColor = Color.start;
 		lastStart.style.border = "none";
 		lastStart.obstacle = false;
-		for(let i = 0; i < h; i++) {
-			for(let j = 0; j < w; j++) {
-				if(grid[i][j].el == lastStart){
+		for (let i = 0; i < h; i++) {
+			for (let j = 0; j < w; j++) {
+				if (grid[i][j].el == lastStart) {
 					start = grid[i][j];
 					start.obstacle = false;
 				}
 			}
 		}
-	} else if(document.getElementById("stop").checked == true){
-		if(lastStop !== undefined) {
-			if(lastStop.obstacle == false && lastStop.style.backgroundColor == Color.goal) {
+	} else if (document.getElementById("stop").checked == true) {
+		if (lastStop !== undefined) {
+			if (lastStop.obstacle == false && lastStop.style.backgroundColor == Color.goal) {
 				lastStop.style.backgroundColor = Color.clearNode;
-				lastStop.style.border = Color.nodeBorder;      
+				lastStop.style.border = Color.nodeBorder;
 			}
 			resetPath();
-		} 
+		}
 		lastStop = e.target;
 		lastStop.style.backgroundColor = Color.goal;
 		lastStop.style.border = "none";
 		lastStop.obstacle = false;
-		for(let i = 0; i < h; i++) {
-			for(let j = 0; j < w; j++) {
-				if(grid[i][j].el == lastStop){
+		for (let i = 0; i < h; i++) {
+			for (let j = 0; j < w; j++) {
+				if (grid[i][j].el == lastStop) {
 					goal = grid[i][j];
 					goal.obstacle = false;
 				}
 			}
 		}
-	} else if(document.getElementById("obst").checked == true) {
+	} else if (document.getElementById("obst").checked == true) {
 		let spot = e.target;
 		spot.style.backgroundColor = Color.obstacle;
 		spot.style.border = "none";
-		for(let i = 0; i < h; i++) {
-			for(let j = 0; j < w; j++) {
-				if(grid[i][j].el == spot && grid[i][j].obstacle == false){
+		for (let i = 0; i < h; i++) {
+			for (let j = 0; j < w; j++) {
+				if (grid[i][j].el == spot && grid[i][j].obstacle == false) {
 					grid[i][j].obstacle = true;
-					if(grid[i][j] == goal) {
+					if (grid[i][j] == goal) {
 						goal = undefined;
 						resetPath();
-					}else if(grid[i][j] == start) {
+					} else if (grid[i][j] == start) {
 						start = undefined;
 						resetPath();
 					}
-					if(isOnPath(grid[i][j])) {
+					if (isOnPath(grid[i][j])) {
 						resetPath();
 						runAlgorithm();
 					}
-				} else if(grid[i][j].el == spot && grid[i][j].obstacle == true){
+				} else if (grid[i][j].el == spot && grid[i][j].obstacle == true) {
 					goal = undefined;
 					grid[i][j].obstacle = false;
 					grid[i][j].el.style.backgroundColor = Color.clearNode;
@@ -88,14 +88,13 @@ document.getElementById("grid").addEventListener("click",function(e) {
 	}
 });
 
-function runAlgorithm () {
-	// $('#toast-container').fadeOut();
+function runAlgorithm() {
 	const toastElement = $('.toast').first()[0];
-  	if(toastElement) toastElement.M_Toast.remove();;
-	if(document.getElementById('aStar').checked == true) {
+	if (toastElement) toastElement.M_Toast.remove();;
+	if (document.getElementById('aStar').checked == true) {
 		aStar(start, goal);
 		console.log('A* selected.');
-	} else if(document.getElementById('Dijkstra').checked == true) {
+	} else if (document.getElementById('Dijkstra').checked == true) {
 		dijkstra(start, goal);
 		console.log('Dijkstra selected.');
 	}
@@ -106,20 +105,16 @@ document.getElementById('addObstacles').addEventListener('click', setObstacles);
 document.getElementById('clearGrid').addEventListener('click', clearGrid);
 document.getElementById('saveGrid').addEventListener('click', saveGrid);
 document.getElementById('myFile').addEventListener('change', readFile, false);
-document.getElementById('getFile').onclick = function() {
-    document.getElementById('myFile').click();
+document.getElementById('getFile').onclick = function () {
+	document.getElementById('myFile').click();
 };
 
-window.addEventListener('keyup',(e)=>{
-	if(e.keyCode == 81 || e.keyCode == 113) {
-		if(document.getElementById('start').checked == true) {
+window.addEventListener('keyup', (e) => {
+	if (e.keyCode == 81 || e.keyCode == 113) {
+		if (document.getElementById('start').checked == true) {
 			document.getElementById('stop').checked = true;
 		} else {
 			document.getElementById('start').checked = true;
 		}
 	}
 });
-
-
-
-
