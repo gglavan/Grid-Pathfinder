@@ -1,72 +1,84 @@
 html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%; 
+  margin: 0;
+  padding: 0;
+  height: 100%; 
   }
   
-  #grid {
-    padding: 0;
-    margin: 0;
-    position: absolute;
-  }
+#grid {
+  padding: 0;
+  margin: 0;
+  position: absolute;
+}
 
-  .cell {
-    margin: 0;
-    padding: 0;
-    float: left;
-    width: 20px;
-    height: 20px;
-    box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
-    border: 1px solid #E6E6E6;
-    background-color: white;
-  }
-  
-  #menu {
-    font-family: 'Roboto';
-    font-weight: 700;
-    position: absolute;
-    bottom: 0;
-    background-color: #27363B;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    padding: 0;
-  }
+.cell {
+  margin: 0;
+  padding: 0;
+  float: left;
+  width: 20px;
+  height: 20px;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  border: 1px solid #E6E6E6;
+  background-color: white;
+}
 
-  #obstacles {
-    width: 10%;
-    float: right;
+#menu {
+  font-family: 'Roboto';
+  font-weight: 700;
+  position: absolute;
+  bottom: 0;
+  background-color: #27363B;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0;
+}
 
-  }
+#obstacles {
+  width: 10%;
+  float: right;
 
-  #setObstaclesBtn {
-    float: right;
-  }
+}
 
-  #menu ul li {
-    display: inline-block;
-    margin-right: 20px;
-  }
+#setObstaclesBtn {
+  float: right;
+}
 
-  .delimiter {
-    width: 2px;
-    background-color: #9A9698; 
-    height: 35px;
-    margin-right: 20px;
-    opacity: 0.5;
-  }
+#menu ul li {
+  display: inline-block;
+  margin-right: 20px;
+}
 
-  /* ============ Styling the alert ============ */
-  
-  #toast-container {
-    top: 3% !important;
-    right: 2% !important;
-    bottom: auto !important;
-    left: auto !important;
-  }
+.delimiter {
+  width: 2px;
+  background-color: #9A9698; 
+  height: 35px;
+  margin-right: 20px;
+  opacity: 0.5;
+}
 
-  .fixed-action-btn {
-    bottom: -8px !important;
-  }
+/* ============ Styling the alert ============ */
+
+#toast-container {
+  top: 3% !important;
+  right: 2% !important;
+  bottom: auto !important;
+  left: auto !important;
+  white-space: pre;
+  -webkit-transition: opacity 500ms ease-in-out;
+  -moz-transition: opacity 500ms ease-in-out;
+  -o-transition: opacity 500ms ease-in-out;
+  transition: opacity 500ms ease-in-out;
+}
+
+#toast-container:hover {
+  opacity: 0.5;
+}
+
+.fixed-action-btn {
+  bottom: -8px !important;
+}
+
+/* ============ Styling the path info ============ */ 
+

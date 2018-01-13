@@ -69,19 +69,19 @@
 
 "use strict";
 class Cell {
-	constructor(x, y, el) {
+	constructor (x, y, el) {
 		this.x = x;
 		this.y = y;
 		this.g = 0;
 		this.h = 0;
 		this.f = 0;
-		this.distance = Number.MAX_VALUE;
+		this.distance = Number.MAX_SAFE_INTEGER;
 		this.obstacle = false;
-		this.opened = false;
+		this.visited = false;
 		this.el = el;
 		this.parent;
 	}
-	heuristic(goal) {
+	heuristic (goal) {
 		const dx = Math.abs(this.x - goal.x);
 		const dy = Math.abs(this.y - goal.y);
 		// return dx + dy;
@@ -128,28 +128,42 @@ const Color = {
 /* harmony export (immutable) */ __webpack_exports__["b"] = Color;
 
 
-// Watch for the initial setup
+// Alert controller
 const Alert = {
-	start: () => Materialize.toast('Please set the initial spot!', 1500, 'red darken-1'),
-	goal: () => Materialize.toast('Please set the finish spot!', 1500, 'red darken-1'),
-	both: () => Materialize.toast('Please set the initial spots!', 1500, 'red darken-1'),
-	notFound: () => Materialize.toast('Path not found!', 1500, 'red darken-1')
+	start: () => Materialize.toast(`Please set the start spot!`, 1500, 'red lighten-1'),
+	goal: () => Materialize.toast('Please set the finish spot!', 1500, 'red lighten-1'),
+	both: () => Materialize.toast('Please set the initial spots!', 1500, 'red lighten-1'),
+	notFound: () => Materialize.toast('Path not found!', 1500, 'red lighten-1'),
+	pathInfo: (nodes, length, time) => Materialize.toast(`Visited nodes: ${nodes}\nPath length: ${length}\nTime: ${time}s`, 100000, 'green lighten-2')
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = Alert;
 
 
 // Async function to draw the path
-async function drawPath (drawOrder, lastPath) {
+async function drawPath () {
     if (lastPath.length) {
+		const t0 = performance.now();
         for (let i = 0, len = drawOrder.length; i < len; i++) {
-			grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor = drawOrder[i].opened ? Color.closedNode : Color.openNode;
+			grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor = drawOrder[i].visited ? Color.closedNode : Color.openNode;
+			grid[drawOrder[i].x][drawOrder[i].y].distance = Number.MAX_SAFE_INTEGER;
 			await sleep(5);
         }
-        for(let i = lastPath.length - 1; i >= 0; i--) {
+        for (let i = lastPath.length - 1; i >= 0; i--) {
             lastPath[i].el.style.backgroundColor = Color.path;
 		    lastPath[i].el.style.border = "none";
             await sleep(5);
-        }
+		}
+		const t1 = performance.now();
+		let visitedNodes = 0;
+		for (let i = 0; i < h; i++) {
+			for (let j = 0; j < w; j++) {
+				if(grid[i][j].el.style.backgroundColor == Color.closedNode ||
+				   grid[i][j].el.style.backgroundColor == Color.openNode ||
+				   grid[i][j].el.style.backgroundColor == Color.path)
+				   visitedNodes++;
+			}
+		}
+		Alert.pathInfo(visitedNodes, lastPath.length, ((t1 - t0) / 1000).toFixed(2));
     }
 }
 
@@ -158,14 +172,17 @@ function resetPath() {
     for (let i = 0; i < lastPath.length; i++) {
         if (lastPath[i].el.style.backgroundColor == Color.path) {
             lastPath[i].el.style.backgroundColor = Color.clearNode;
-            lastPath[i].el.style.border = Color.nodeBorder;
+			lastPath[i].el.style.border = Color.nodeBorder;
         } 
 	}
 	for (let i = 0; i < drawOrder.length; i++) {
 		if (grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor == Color.openNode || 
 			grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor === Color.closedNode)
 				grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor = Color.clearNode;
-    }
+	}
+	// console.log(start, goal)
+	// goal.distance = Number.MAX_SAFE_INTEGER;
+	// start.distance = Number.MAX_SAFE_INTEGER;
 }
 
 // Implemented artificial sleep for async to work
@@ -679,14 +696,14 @@ global.lastPath = [];
 global.drawOrder = [];
 global.h = 0;
 global.w = 0;
-global.lastStart = undefined; 
+global.lastStart = undefined;
 global.lastStop = undefined;
 global.start = undefined;
 global.goal = undefined;
 
 window.onload = Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["b" /* initGrid */])();
 
-document.getElementById("grid").addEventListener("click",function(e){
+document.getElementById("grid").addEventListener("click",function(e) {
 	if(document.getElementById("start").checked == true){
 		if(lastStart !== undefined) {
 			if(lastStart.obstacle == false && lastStart.style.backgroundColor == __WEBPACK_IMPORTED_MODULE_4__Draw__["b" /* Color */].start) {
@@ -698,12 +715,12 @@ document.getElementById("grid").addEventListener("click",function(e){
 		lastStart = e.target;
 		lastStart.style.backgroundColor = __WEBPACK_IMPORTED_MODULE_4__Draw__["b" /* Color */].start;
 		lastStart.style.border = "none";
+		lastStart.obstacle = false;
 		for(let i = 0; i < h; i++) {
 			for(let j = 0; j < w; j++) {
 				if(grid[i][j].el == lastStart){
 					start = grid[i][j];
 					start.obstacle = false;
-					lastStart.obstacle = false;                
 				}
 			}
 		}
@@ -744,7 +761,7 @@ document.getElementById("grid").addEventListener("click",function(e){
 					}
 					if(Object(__WEBPACK_IMPORTED_MODULE_4__Draw__["d" /* isOnPath */])(grid[i][j])) {
 						Object(__WEBPACK_IMPORTED_MODULE_4__Draw__["e" /* resetPath */])();
-						Object(__WEBPACK_IMPORTED_MODULE_2__A_Star__["a" /* aStar */])(start, goal);
+						runAlgorithm();
 					}
 				} else if(grid[i][j].el == spot && grid[i][j].obstacle == true){
 					goal = undefined;
@@ -757,7 +774,10 @@ document.getElementById("grid").addEventListener("click",function(e){
 	}
 });
 
-function runAlgorithm(){
+function runAlgorithm () {
+	// $('#toast-container').fadeOut();
+	const toastElement = $('.toast').first()[0];
+  	if(toastElement) toastElement.M_Toast.remove();;
 	if(document.getElementById('aStar').checked == true) {
 		Object(__WEBPACK_IMPORTED_MODULE_2__A_Star__["a" /* aStar */])(start, goal);
 		console.log('A* selected.');
@@ -828,9 +848,6 @@ module.exports = g;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Cell__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Grid__ = __webpack_require__(2);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Draw__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__priority_queue__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__priority_queue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__priority_queue__);
-
 
 
 
@@ -859,7 +876,7 @@ function aStar (start, goal) {
         start.h = start.heuristic(goal);
         start.f = start.g + start.h;
         
-        //Push the start cell in the open list
+        // Push the start cell in the open list
         openSet.push(start);
         
         while(openSet.length > 0) {
@@ -871,7 +888,8 @@ function aStar (start, goal) {
                 }
             }
             let q = openSet[lowestF];
-            //Check if the goal is reached
+
+            // Check if the goal is reached
             if(Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["c" /* isSameNode */])(q, goal)) {
                 let curr = q.parent;
                 while(curr.x != start.x || curr.y != start.y){
@@ -884,19 +902,19 @@ function aStar (start, goal) {
                 console.log("Counter: " + counter);
                 console.log("openSet length: " + openSet.length)
                 console.log("closedSet length: " + closedSet.length)
-
                 return;
             }
             
+            // Pop the cell from the open set
             openSet.splice(lowestF, 1);
 
-            //Switch the cell to the closed list
+            // Switch the cell to the closed list
             closedSet.push(q);
             if (!Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["c" /* isSameNode */])(q, start)) {
-                q.opened = false;
+                q.visited = false;
                 drawOrder.push(q); 
             }  
-            //Get the neighbors array of the current cell    
+            // Get the neighbors array of the current cell    
             let neighborsSet = neighbors(q);
             for(let i = 0; i < neighborsSet.length; i++) {
                 if (indexOfNode(closedSet, neighborsSet[i]) === -1) {
@@ -904,7 +922,7 @@ function aStar (start, goal) {
                     if (index === -1) {
                         neighborsSet[i].f = neighborsSet[i].g + neighborsSet[i].heuristic(goal);
                         openSet.push(neighborsSet[i]);
-                        neighborsSet[i].opened = true;
+                        neighborsSet[i].visited = true;
                         if (!Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["c" /* isSameNode */])(neighborsSet[i], start) && !Object(__WEBPACK_IMPORTED_MODULE_1__Grid__["c" /* isSameNode */])(neighborsSet[i], goal)) 
                             drawOrder.push(neighborsSet[i]);
                     } else if (neighborsSet[i].g < openSet[index].g) {
@@ -918,7 +936,7 @@ function aStar (start, goal) {
     }
 }
 
-//Generate the neighbors of the current cell
+// Generate the neighbors of the current cell
 function neighbors(node) {
 	let neighbors = [];
     let i = node.x;
@@ -999,17 +1017,17 @@ function indexOfNode(array, node) {
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Cell__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__priority_queue__ = __webpack_require__(3);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__priority_queue___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2__priority_queue__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__Grid__ = __webpack_require__(2);
 
 
 
 
 
-let horizontalVerticalDistance = 1;
+
+
 let diagonalDistance = 2;
-///
-///
-function dijkstra(start, goal) {
-    let iteration = 0;
+
+function dijkstra (start, goal) {
     if (start == undefined && goal == undefined) {
         __WEBPACK_IMPORTED_MODULE_0__Draw__["a" /* Alert */].both();
     } else if (start == undefined) {
@@ -1019,122 +1037,147 @@ function dijkstra(start, goal) {
     } else {
         let currentNode;
         let tempNode;
-
-        if(lastPath.length > 0) {
+        if (lastPath.length > 0) {
             Object(__WEBPACK_IMPORTED_MODULE_0__Draw__["e" /* resetPath */])();
-            lastPath = []; 
+            lastPath = [];
+            drawOrder = [];  
         }
+        goal.visited = false;
+	    goal.distance = Number.MAX_SAFE_INTEGER;
+	    start.distance = Number.MAX_SAFE_INTEGER;
+        start.visited = false;
+        console.log("NOW")
+        console.log(start, goal)
         let counter = 0;
         start.distance = 0;
-
-        var queue = new __WEBPACK_IMPORTED_MODULE_2__priority_queue___default.a({ comparator: function(a,  b) {return a.distance - b.distance}});
+        let queue = new __WEBPACK_IMPORTED_MODULE_2__priority_queue___default.a({ comparator: (a, b) => a.distance - b.distance});
         queue.queue(start);
-        while(queue.length > 0){
+        
+        while (queue.length > 0) {
             currentNode = queue.dequeue();
             tempNode = new __WEBPACK_IMPORTED_MODULE_1__Cell__["c" /* default */](0, 0, currentNode.el);
-
-          // TOP
-          if(currentNode.x - 1 >= 0){
-              tempNode = grid[currentNode.x-1][currentNode.y];
-              if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + horizontalVerticalDistance) {
-                  tempNode.distance = currentNode.distance + horizontalVerticalDistance;
-                  tempNode.parent = currentNode;
-                  queue.queue(tempNode);
-                  counter++;
+            if (!(goal.distance == Number.MAX_SAFE_INTEGER)) {
+                let cNode = grid[goal.x][goal.y].parent;
+                while (cNode.parent != null) {
+                    cNode.el = grid[cNode.x][cNode.y].el;
+                    lastPath.push(cNode);
+                    cNode = cNode.parent;
                 }
+                console.log("Min path length: " + lastPath.length);
+                console.log(drawOrder);
+                for (let i = 0, len = drawOrder.length; i < len; i++) {
+                    drawOrder[i].visited = false;
+                    grid[drawOrder[i].x][drawOrder[i].y].visited = false;
+                }
+                Object(__WEBPACK_IMPORTED_MODULE_0__Draw__["c" /* drawPath */])();
+                return;
+            }
 
-                // // TOP LEFT
-                // if (currentNode.y - 1 > 0) {
-                //     tempNode = grid[currentNode.x - 1][currentNode.y - 1];
-                //     if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + diagonalDistance) {
-                //         tempNode.distance = currentNode.distance + diagonalDistance;
-                //         tempNode.parent = currentNode;
-                //         queue.queue(tempNode);
-                //     }
-                // }
-                //
-                // // TOP RIGHT
-                // if (currentNode.y + 1 < width) {
-                //     tempNode = grid[currentNode.x - 1][currentNode.y + 1];
-                //     if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + diagonalDistance) {
-                //         tempNode.distance = currentNode.distance + diagonalDistance;
-                //         tempNode.parent = currentNode;
-                //         queue.queue(tempNode);
-                //     }
-                // }
+            // TOP
+            if (currentNode.x - 1 >= 0) {
+                tempNode = grid[currentNode.x-1][currentNode.y];
+                if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + __WEBPACK_IMPORTED_MODULE_1__Cell__["a" /* STRAIGHT_COST */]) {
+                    tempNode.distance = currentNode.distance + __WEBPACK_IMPORTED_MODULE_1__Cell__["a" /* STRAIGHT_COST */];
+                    tempNode.parent = currentNode;
+                    if(!Object(__WEBPACK_IMPORTED_MODULE_3__Grid__["c" /* isSameNode */])(tempNode, start) && !Object(__WEBPACK_IMPORTED_MODULE_3__Grid__["c" /* isSameNode */])(tempNode, goal))
+                        drawOrder.push(tempNode);
+                    queue.queue(tempNode);
+                }
             }
 
             // LEFT
-            // delete -1
             if (currentNode.y > 0) {
-                  tempNode = grid[currentNode.x][currentNode.y - 1];
-                  if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + horizontalVerticalDistance) {
-                      tempNode.distance = currentNode.distance + horizontalVerticalDistance;
-                      tempNode.parent = currentNode;
-                      queue.queue(tempNode);
-                      counter++;
-                    }
+                tempNode = grid[currentNode.x][currentNode.y - 1];
+                if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + __WEBPACK_IMPORTED_MODULE_1__Cell__["a" /* STRAIGHT_COST */]) {
+                    tempNode.distance = currentNode.distance + __WEBPACK_IMPORTED_MODULE_1__Cell__["a" /* STRAIGHT_COST */];
+                    tempNode.parent = currentNode;
+                    if(!Object(__WEBPACK_IMPORTED_MODULE_3__Grid__["c" /* isSameNode */])(tempNode, start) && !Object(__WEBPACK_IMPORTED_MODULE_3__Grid__["c" /* isSameNode */])(tempNode, goal))
+                        drawOrder.push(tempNode);
+                    queue.queue(tempNode);
+                }
             }
+
             // RIGHT
             if (currentNode.y + 1 < w) {
                 tempNode = grid[currentNode.x][currentNode.y + 1];
-                if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + horizontalVerticalDistance) {
-                    tempNode.distance = currentNode.distance + horizontalVerticalDistance;
+                if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + __WEBPACK_IMPORTED_MODULE_1__Cell__["a" /* STRAIGHT_COST */]) {
+                    tempNode.distance = currentNode.distance + __WEBPACK_IMPORTED_MODULE_1__Cell__["a" /* STRAIGHT_COST */];
                     tempNode.parent = currentNode;
+                    if(!Object(__WEBPACK_IMPORTED_MODULE_3__Grid__["c" /* isSameNode */])(tempNode, start) && !Object(__WEBPACK_IMPORTED_MODULE_3__Grid__["c" /* isSameNode */])(tempNode, goal))
+                        drawOrder.push(tempNode);
                     queue.queue(tempNode);
-                    counter++;
                 }
             }
             // DOWN
             if (currentNode.x + 1 < h) {
                 tempNode = grid[currentNode.x + 1][currentNode.y];
-                if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + horizontalVerticalDistance) {
-                    tempNode.distance = currentNode.distance + horizontalVerticalDistance;
+                if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + __WEBPACK_IMPORTED_MODULE_1__Cell__["a" /* STRAIGHT_COST */]) {
+                    tempNode.distance = currentNode.distance + __WEBPACK_IMPORTED_MODULE_1__Cell__["a" /* STRAIGHT_COST */];
                     tempNode.parent = currentNode;
+                    if(!Object(__WEBPACK_IMPORTED_MODULE_3__Grid__["c" /* isSameNode */])(tempNode, start) && !Object(__WEBPACK_IMPORTED_MODULE_3__Grid__["c" /* isSameNode */])(tempNode, goal))
+                        drawOrder.push(tempNode);
                     queue.queue(tempNode);
-                    counter++;
                 }
-                // // DOWN LEFT
-                // if (currentNode.y - 1 >= 0) {
-                //     tempNode = grid[currentNode.x + 1][currentNode.y - 1];
-                //     if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + diagonalDistance) {
-                //         tempNode.distance = currentNode.distance + diagonalDistance;
-                //         tempNode.parent = currentNode;
-                //         queue.queue(tempNode);
-                //     }
-                // }
-                //
-                // // DOWN RIGHT
-                // if (currentNode.y + 1 < width) {
-                //     tempNode = grid[currentNode.x + 1][currentNode.y + 1];
-                //     if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + diagonalDistance) {
-                //         tempNode.distance = currentNode.distance + diagonalDistance;
-                //         tempNode.parent = currentNode;
-                //         queue.queue(tempNode);
-                //     }
-                // }
             }
+            // grid[currentNode.x][currentNode.y].visited = true;
             currentNode.visited = true;
-          }
-
-          // CHECK IF PATH EXISTS
-          if(!(grid[goal.x][goal.y].distance == Number.MAX_VALUE)){
-              let cNode = grid[goal.x][goal.y].parent;
-              while(cNode.parent != null) {
-                  cNode.el = grid[cNode.x][cNode.y].el;
-                  lastPath.push(cNode);
-                  cNode = cNode.parent;
-              }
-              int = setInterval(__WEBPACK_IMPORTED_MODULE_0__Draw__["c" /* drawPath */], 5);
-                console.log("Min path length: " + lastPath.length);
-                console.log("Counter: " + counter);
-              return;
-          } else {
-              return __WEBPACK_IMPORTED_MODULE_0__Draw__["a" /* Alert */].notFound();
-          }
-     }
+        }
+        return __WEBPACK_IMPORTED_MODULE_0__Draw__["a" /* Alert */].notFound();
+    }
 }
 
+// For diagonal movement
+
+// // TOP LEFT
+// if (currentNode.y - 1 > 0) {
+//     tempNode = grid[currentNode.x - 1][currentNode.y - 1];
+//     if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + diagonalDistance) {
+//         tempNode.distance = currentNode.distance + diagonalDistance;
+//         tempNode.parent = currentNode;
+//         queue.queue(tempNode);
+//     }
+// }
+
+// // TOP RIGHT
+// if (currentNode.y + 1 < width) {
+//     tempNode = grid[currentNode.x - 1][currentNode.y + 1];
+//     if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + diagonalDistance) {
+//         tempNode.distance = currentNode.distance + diagonalDistance;
+//         tempNode.parent = currentNode;
+//         queue.queue(tempNode);
+//     }
+// }
+
+// // DOWN LEFT
+// if (currentNode.y - 1 >= 0) {
+//     tempNode = grid[currentNode.x + 1][currentNode.y - 1];
+//     if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + diagonalDistance) {
+//         tempNode.distance = currentNode.distance + diagonalDistance;
+//         tempNode.parent = currentNode;
+//         queue.queue(tempNode);
+//     }
+// }
+
+// // DOWN RIGHT
+// if (currentNode.y + 1 < width) {
+//     tempNode = grid[currentNode.x + 1][currentNode.y + 1];
+//     if (!tempNode.visited && !tempNode.obstacle && tempNode.distance > currentNode.distance + diagonalDistance) {
+//         tempNode.distance = currentNode.distance + diagonalDistance;
+//         tempNode.parent = currentNode;
+//         queue.queue(tempNode);
+//     }
+// }
+
+
+// let visitedCounter = distanceCounter = 0
+// for(let i = 0; i < h; i++) {
+//     for(let j = 0; j < w; j++) {
+//         if(grid[i][j].visited)
+//             visitedCounter++;
+//         if(grid[i][j].distance != Number.MAX_VALUE)
+//             distanceCounter++;
+//         }
+// }
 
 /***/ }),
 /* 8 */

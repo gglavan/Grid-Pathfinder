@@ -12,26 +12,40 @@ export const Color = {
 	nodeBorder: "1px solid rgb(230, 230, 230)"
 }
 
-// Watch for the initial setup
+// Alert controller
 export const Alert = {
-	start: () => Materialize.toast('Please set the initial spot!', 1500, 'red darken-1'),
-	goal: () => Materialize.toast('Please set the finish spot!', 1500, 'red darken-1'),
-	both: () => Materialize.toast('Please set the initial spots!', 1500, 'red darken-1'),
-	notFound: () => Materialize.toast('Path not found!', 1500, 'red darken-1')
+	start: () => Materialize.toast(`Please set the start spot!`, 1500, 'red lighten-1'),
+	goal: () => Materialize.toast('Please set the finish spot!', 1500, 'red lighten-1'),
+	both: () => Materialize.toast('Please set the initial spots!', 1500, 'red lighten-1'),
+	notFound: () => Materialize.toast('Path not found!', 1500, 'red lighten-1'),
+	pathInfo: (nodes, length, time) => Materialize.toast(`Visited nodes: ${nodes}\nPath length: ${length}\nTime: ${time}s`, 100000, 'green lighten-2')
 }
 
 // Async function to draw the path
-export async function drawPath (drawOrder, lastPath) {
+export async function drawPath () {
     if (lastPath.length) {
+		const t0 = performance.now();
         for (let i = 0, len = drawOrder.length; i < len; i++) {
-			grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor = drawOrder[i].opened ? Color.closedNode : Color.openNode;
+			grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor = drawOrder[i].visited ? Color.closedNode : Color.openNode;
+			grid[drawOrder[i].x][drawOrder[i].y].distance = Number.MAX_SAFE_INTEGER;
 			await sleep(5);
         }
-        for(let i = lastPath.length - 1; i >= 0; i--) {
+        for (let i = lastPath.length - 1; i >= 0; i--) {
             lastPath[i].el.style.backgroundColor = Color.path;
 		    lastPath[i].el.style.border = "none";
             await sleep(5);
-        }
+		}
+		const t1 = performance.now();
+		let visitedNodes = 0;
+		for (let i = 0; i < h; i++) {
+			for (let j = 0; j < w; j++) {
+				if(grid[i][j].el.style.backgroundColor == Color.closedNode ||
+				   grid[i][j].el.style.backgroundColor == Color.openNode ||
+				   grid[i][j].el.style.backgroundColor == Color.path)
+				   visitedNodes++;
+			}
+		}
+		Alert.pathInfo(visitedNodes, lastPath.length, ((t1 - t0) / 1000).toFixed(2));
     }
 }
 
@@ -40,14 +54,17 @@ export function resetPath() {
     for (let i = 0; i < lastPath.length; i++) {
         if (lastPath[i].el.style.backgroundColor == Color.path) {
             lastPath[i].el.style.backgroundColor = Color.clearNode;
-            lastPath[i].el.style.border = Color.nodeBorder;
+			lastPath[i].el.style.border = Color.nodeBorder;
         } 
 	}
 	for (let i = 0; i < drawOrder.length; i++) {
 		if (grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor == Color.openNode || 
 			grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor === Color.closedNode)
 				grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor = Color.clearNode;
-    }
+	}
+	// console.log(start, goal)
+	// goal.distance = Number.MAX_SAFE_INTEGER;
+	// start.distance = Number.MAX_SAFE_INTEGER;
 }
 
 // Implemented artificial sleep for async to work

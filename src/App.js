@@ -2,7 +2,7 @@ import Cell, { cellSize } from './Cell.js'
 import { initGrid, clearGrid } from './Grid'
 import { aStar } from './A_Star'
 import { dijkstra } from './Dijkstra'
-import { setObstacles, isOnPath, resetPath, Color	 } from './Draw'
+import { setObstacles, isOnPath, resetPath, Color } from './Draw'
 import { readFile, saveGrid } from './File'
 
 global.grid = [[]];
@@ -10,14 +10,14 @@ global.lastPath = [];
 global.drawOrder = [];
 global.h = 0;
 global.w = 0;
-global.lastStart = undefined; 
+global.lastStart = undefined;
 global.lastStop = undefined;
 global.start = undefined;
 global.goal = undefined;
 
 window.onload = initGrid();
 
-document.getElementById("grid").addEventListener("click",function(e){
+document.getElementById("grid").addEventListener("click",function(e) {
 	if(document.getElementById("start").checked == true){
 		if(lastStart !== undefined) {
 			if(lastStart.obstacle == false && lastStart.style.backgroundColor == Color.start) {
@@ -29,12 +29,12 @@ document.getElementById("grid").addEventListener("click",function(e){
 		lastStart = e.target;
 		lastStart.style.backgroundColor = Color.start;
 		lastStart.style.border = "none";
+		lastStart.obstacle = false;
 		for(let i = 0; i < h; i++) {
 			for(let j = 0; j < w; j++) {
 				if(grid[i][j].el == lastStart){
 					start = grid[i][j];
 					start.obstacle = false;
-					lastStart.obstacle = false;                
 				}
 			}
 		}
@@ -75,7 +75,7 @@ document.getElementById("grid").addEventListener("click",function(e){
 					}
 					if(isOnPath(grid[i][j])) {
 						resetPath();
-						aStar(start, goal);
+						runAlgorithm();
 					}
 				} else if(grid[i][j].el == spot && grid[i][j].obstacle == true){
 					goal = undefined;
@@ -88,7 +88,10 @@ document.getElementById("grid").addEventListener("click",function(e){
 	}
 });
 
-function runAlgorithm(){
+function runAlgorithm () {
+	// $('#toast-container').fadeOut();
+	const toastElement = $('.toast').first()[0];
+  	if(toastElement) toastElement.M_Toast.remove();;
 	if(document.getElementById('aStar').checked == true) {
 		aStar(start, goal);
 		console.log('A* selected.');

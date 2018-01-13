@@ -3,7 +3,6 @@ import { STRAIGHT_COST } from './Cell'
 import { isSameNode } from './Grid'
 import { drawPath, resetPath } from './Draw'
 import { Alert } from './Draw'
-import PriorityQueue from './priority-queue'
 
 export function aStar (start, goal) {
     if (start == undefined && goal == undefined) {
@@ -27,7 +26,7 @@ export function aStar (start, goal) {
         start.h = start.heuristic(goal);
         start.f = start.g + start.h;
         
-        //Push the start cell in the open list
+        // Push the start cell in the open list
         openSet.push(start);
         
         while(openSet.length > 0) {
@@ -39,7 +38,8 @@ export function aStar (start, goal) {
                 }
             }
             let q = openSet[lowestF];
-            //Check if the goal is reached
+
+            // Check if the goal is reached
             if(isSameNode(q, goal)) {
                 let curr = q.parent;
                 while(curr.x != start.x || curr.y != start.y){
@@ -52,19 +52,19 @@ export function aStar (start, goal) {
                 console.log("Counter: " + counter);
                 console.log("openSet length: " + openSet.length)
                 console.log("closedSet length: " + closedSet.length)
-
                 return;
             }
             
+            // Pop the cell from the open set
             openSet.splice(lowestF, 1);
 
-            //Switch the cell to the closed list
+            // Switch the cell to the closed list
             closedSet.push(q);
             if (!isSameNode(q, start)) {
-                q.opened = false;
+                q.visited = false;
                 drawOrder.push(q); 
             }  
-            //Get the neighbors array of the current cell    
+            // Get the neighbors array of the current cell    
             let neighborsSet = neighbors(q);
             for(let i = 0; i < neighborsSet.length; i++) {
                 if (indexOfNode(closedSet, neighborsSet[i]) === -1) {
@@ -72,7 +72,7 @@ export function aStar (start, goal) {
                     if (index === -1) {
                         neighborsSet[i].f = neighborsSet[i].g + neighborsSet[i].heuristic(goal);
                         openSet.push(neighborsSet[i]);
-                        neighborsSet[i].opened = true;
+                        neighborsSet[i].visited = true;
                         if (!isSameNode(neighborsSet[i], start) && !isSameNode(neighborsSet[i], goal)) 
                             drawOrder.push(neighborsSet[i]);
                     } else if (neighborsSet[i].g < openSet[index].g) {
@@ -86,7 +86,7 @@ export function aStar (start, goal) {
     }
 }
 
-//Generate the neighbors of the current cell
+// Generate the neighbors of the current cell
 function neighbors(node) {
 	let neighbors = [];
     let i = node.x;

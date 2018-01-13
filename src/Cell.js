@@ -1,17 +1,17 @@
 export default class Cell {
-	constructor(x, y, el) {
+	constructor (x, y, el) {
 		this.x = x;
 		this.y = y;
 		this.g = 0;
 		this.h = 0;
 		this.f = 0;
-		this.distance = Number.MAX_VALUE;
+		this.distance = Number.MAX_SAFE_INTEGER;
 		this.obstacle = false;
-		this.opened = false;
+		this.visited = false;
 		this.el = el;
 		this.parent;
 	}
-	heuristic(goal) {
+	heuristic (goal) {
 		const dx = Math.abs(this.x - goal.x);
 		const dy = Math.abs(this.y - goal.y);
 		// return dx + dy;
