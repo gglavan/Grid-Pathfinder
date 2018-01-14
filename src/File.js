@@ -11,9 +11,7 @@ export function readFile(e) {
 		const url = window.URL || window.webkitURL;
 		const src = url.createObjectURL(file);
 		img.src = src;
-		img.onload = () => {
-			draw(img);
-		};
+		img.onload = () => draw(img);
 	} else {
 		const reader = new FileReader();
 		reader.onload = (e) => {

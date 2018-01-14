@@ -23,6 +23,7 @@ export const Alert = {
 // Async function to draw the path
 export async function drawPath() {
 	if (lastPath.length) {
+		document.getElementById('generatePathBtn').classList.add('disabled');
 		const t0 = performance.now();
 		for (let i = 0, len = drawOrder.length; i < len; i++) {
 			grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor = Color.visitedNode;
@@ -35,6 +36,7 @@ export async function drawPath() {
 			await sleep(2);
 		}
 		const t1 = performance.now();
+		document.getElementById('generatePathBtn').classList.remove('disabled');
 		let visitedNodes = 0;
 		for (let i = 0; i < h; i++) {
 			for (let j = 0; j < w; j++) {

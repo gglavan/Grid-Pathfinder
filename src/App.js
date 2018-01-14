@@ -4,6 +4,7 @@ import { aStar } from './A_Star'
 import { dijkstra } from './Dijkstra'
 import { setObstacles, isOnPath, resetPath, Color } from './Draw'
 import { readFile, saveGrid } from './File'
+import css from '../css/style.css'
 
 global.grid = [[]];
 global.lastPath = [];
