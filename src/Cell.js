@@ -9,7 +9,7 @@ export default class Cell {
 		this.obstacle = false;
 		this.visited = false;
 		this.el = el;
-		this.parent;
+		this.parent = null;
 	}
 	heuristic(goal) {
 		const dx = Math.abs(this.x - goal.x);

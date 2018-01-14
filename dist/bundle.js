@@ -79,7 +79,7 @@ class Cell {
 		this.obstacle = false;
 		this.visited = false;
 		this.el = el;
-		this.parent;
+		this.parent = null;
 	}
 	heuristic(goal) {
 		const dx = Math.abs(this.x - goal.x);
@@ -116,8 +116,7 @@ const STRAIGHT_COST = 1;
 
 // Colors container
 const Color = {
-	openNode: "rgb(224, 242, 241)",
-	closedNode: "rgb(128, 203, 196)",
+	visitedNode: "rgb(224, 242, 241)",
 	path: "rgb(179, 229, 252)",
 	obstacle: "rgb(128, 128, 128)",
 	start: "rgb(147, 202, 59)",
@@ -144,25 +143,29 @@ async function drawPath() {
 	if (lastPath.length) {
 		const t0 = performance.now();
 		for (let i = 0, len = drawOrder.length; i < len; i++) {
-			grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor = drawOrder[i].visited ? Color.closedNode : Color.openNode;
+			grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor = Color.visitedNode;
 			grid[drawOrder[i].x][drawOrder[i].y].distance = Number.MAX_SAFE_INTEGER;
-			await sleep(5);
+			await sleep(2);
 		}
 		for (let i = lastPath.length - 1; i >= 0; i--) {
 			lastPath[i].el.style.backgroundColor = Color.path;
 			lastPath[i].el.style.border = "none";
-			await sleep(5);
+			await sleep(2);
 		}
 		const t1 = performance.now();
 		let visitedNodes = 0;
 		for (let i = 0; i < h; i++) {
 			for (let j = 0; j < w; j++) {
-				if (grid[i][j].el.style.backgroundColor == Color.closedNode ||
-					grid[i][j].el.style.backgroundColor == Color.openNode ||
-					grid[i][j].el.style.backgroundColor == Color.path)
+				grid[i][j].parent = null;
+				if ( grid[i][j].el.style.backgroundColor == Color.visitedNode ||
+					 	 grid[i][j].el.style.backgroundColor == Color.path)
 					visitedNodes++;
 			}
 		}
+		start.visited = false;
+		start.distance = Number.MAX_SAFE_INTEGER;
+		goal.visited = false;
+		goal.distance = Number.MAX_SAFE_INTEGER;
 		Alert.pathInfo(visitedNodes, lastPath.length, ((t1 - t0) / 1000).toFixed(2));
 	}
 }
@@ -176,13 +179,9 @@ function resetPath() {
 		}
 	}
 	for (let i = 0; i < drawOrder.length; i++) {
-		if (grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor == Color.openNode ||
-			grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor === Color.closedNode)
+		if (grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor == Color.visitedNode)
 			grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor = Color.clearNode;
 	}
-	// console.log(start, goal)
-	// goal.distance = Number.MAX_SAFE_INTEGER;
-	// start.distance = Number.MAX_SAFE_INTEGER;
 }
 
 // Implemented artificial sleep for async to work
@@ -268,11 +267,16 @@ function clearGrid() {
 	for (let i = 0; i < h; i++) {
 		for (let j = 0; j < w; j++) {
 			grid[i][j].obstacle = false;
+			grid[i][j].visited = false;
+			grid[i][j].parent = null;
+			grid[i][j].distance = Number.MAX_SAFE_INTEGER; 
 			grid[i][j].el.style.backgroundColor = __WEBPACK_IMPORTED_MODULE_1__Draw__["b" /* Color */].clearNode;
-			grid[i][j].el.style.border = __WEBPACK_IMPORTED_MODULE_1__Draw__["b" /* Color */].border;
-			goal = start = undefined;
+			grid[i][j].el.style.border = __WEBPACK_IMPORTED_MODULE_1__Draw__["b" /* Color */].nodeBorder;
 		}
 	}
+	goal = start = undefined;
+	const toastElement = $('.toast').first()[0];
+	if (toastElement) toastElement.M_Toast.remove();;
 }
 
 function isSameNode(nodeA, nodeB) {
@@ -860,7 +864,6 @@ function aStar(start, goal) {
 			lastPath = [];
 			drawOrder = [];
 		}
-		let counter = 0;
 
 		let closedSet = [];
 		let openSet = [];
@@ -890,11 +893,7 @@ function aStar(start, goal) {
 					lastPath.push(curr);
 					curr = curr.parent;
 				}
-				Object(__WEBPACK_IMPORTED_MODULE_2__Draw__["c" /* drawPath */])(drawOrder, lastPath);
-				console.log("Min path length: " + lastPath.length);
-				console.log("Counter: " + counter);
-				console.log("openSet length: " + openSet.length)
-				console.log("closedSet length: " + closedSet.length)
+				Object(__WEBPACK_IMPORTED_MODULE_2__Draw__["c" /* drawPath */])();
 				return;
 			}
 
@@ -1034,8 +1033,6 @@ function dijkstra(start, goal) {
 		goal.distance = Number.MAX_SAFE_INTEGER;
 		start.distance = Number.MAX_SAFE_INTEGER;
 		start.visited = false;
-		console.log("NOW")
-		console.log(start, goal)
 		let counter = 0;
 		start.distance = 0;
 		let queue = new __WEBPACK_IMPORTED_MODULE_2__priority_queue___default.a({
@@ -1053,8 +1050,6 @@ function dijkstra(start, goal) {
 					lastPath.push(cNode);
 					cNode = cNode.parent;
 				}
-				console.log("Min path length: " + lastPath.length);
-				console.log(drawOrder);
 				for (let i = 0, len = drawOrder.length; i < len; i++) {
 					drawOrder[i].visited = false;
 					grid[drawOrder[i].x][drawOrder[i].y].visited = false;

@@ -2,8 +2,7 @@ import { isSameNode } from './Grid'
 
 // Colors container
 export const Color = {
-	openNode: "rgb(224, 242, 241)",
-	closedNode: "rgb(128, 203, 196)",
+	visitedNode: "rgb(224, 242, 241)",
 	path: "rgb(179, 229, 252)",
 	obstacle: "rgb(128, 128, 128)",
 	start: "rgb(147, 202, 59)",
@@ -26,25 +25,29 @@ export async function drawPath() {
 	if (lastPath.length) {
 		const t0 = performance.now();
 		for (let i = 0, len = drawOrder.length; i < len; i++) {
-			grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor = drawOrder[i].visited ? Color.closedNode : Color.openNode;
+			grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor = Color.visitedNode;
 			grid[drawOrder[i].x][drawOrder[i].y].distance = Number.MAX_SAFE_INTEGER;
-			await sleep(5);
+			await sleep(2);
 		}
 		for (let i = lastPath.length - 1; i >= 0; i--) {
 			lastPath[i].el.style.backgroundColor = Color.path;
 			lastPath[i].el.style.border = "none";
-			await sleep(5);
+			await sleep(2);
 		}
 		const t1 = performance.now();
 		let visitedNodes = 0;
 		for (let i = 0; i < h; i++) {
 			for (let j = 0; j < w; j++) {
-				if (grid[i][j].el.style.backgroundColor == Color.closedNode ||
-					grid[i][j].el.style.backgroundColor == Color.openNode ||
-					grid[i][j].el.style.backgroundColor == Color.path)
+				grid[i][j].parent = null;
+				if ( grid[i][j].el.style.backgroundColor == Color.visitedNode ||
+					 	 grid[i][j].el.style.backgroundColor == Color.path)
 					visitedNodes++;
 			}
 		}
+		start.visited = false;
+		start.distance = Number.MAX_SAFE_INTEGER;
+		goal.visited = false;
+		goal.distance = Number.MAX_SAFE_INTEGER;
 		Alert.pathInfo(visitedNodes, lastPath.length, ((t1 - t0) / 1000).toFixed(2));
 	}
 }
@@ -58,13 +61,9 @@ export function resetPath() {
 		}
 	}
 	for (let i = 0; i < drawOrder.length; i++) {
-		if (grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor == Color.openNode ||
-			grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor === Color.closedNode)
+		if (grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor == Color.visitedNode)
 			grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor = Color.clearNode;
 	}
-	// console.log(start, goal)
-	// goal.distance = Number.MAX_SAFE_INTEGER;
-	// start.distance = Number.MAX_SAFE_INTEGER;
 }
 
 // Implemented artificial sleep for async to work

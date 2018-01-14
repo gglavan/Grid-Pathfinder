@@ -66,10 +66,10 @@ html, body {
   bottom: auto !important;
   left: auto !important;
   white-space: pre;
-  -webkit-transition: opacity 500ms ease-in-out;
-  -moz-transition: opacity 500ms ease-in-out;
-  -o-transition: opacity 500ms ease-in-out;
-  transition: opacity 500ms ease-in-out;
+  -webkit-transition: opacity 600ms ease-in-out;
+  -moz-transition: opacity 600ms ease-in-out;
+  -o-transition: opacity 600ms ease-in-out;
+  transition: opacity 600ms ease-in-out;
 }
 
 #toast-container:hover {
@@ -79,6 +79,3 @@ html, body {
 .fixed-action-btn {
   bottom: -8px !important;
 }
-
-/* ============ Styling the path info ============ */ 
-

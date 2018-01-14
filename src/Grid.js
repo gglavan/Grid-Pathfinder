@@ -34,11 +34,16 @@ export function clearGrid() {
 	for (let i = 0; i < h; i++) {
 		for (let j = 0; j < w; j++) {
 			grid[i][j].obstacle = false;
+			grid[i][j].visited = false;
+			grid[i][j].parent = null;
+			grid[i][j].distance = Number.MAX_SAFE_INTEGER; 
 			grid[i][j].el.style.backgroundColor = Color.clearNode;
-			grid[i][j].el.style.border = Color.border;
-			goal = start = undefined;
+			grid[i][j].el.style.border = Color.nodeBorder;
 		}
 	}
+	goal = start = undefined;
+	const toastElement = $('.toast').first()[0];
+	if (toastElement) toastElement.M_Toast.remove();;
 }
 
 export function isSameNode(nodeA, nodeB) {

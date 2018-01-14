@@ -17,7 +17,6 @@ export function aStar(start, goal) {
 			lastPath = [];
 			drawOrder = [];
 		}
-		let counter = 0;
 
 		let closedSet = [];
 		let openSet = [];
@@ -47,11 +46,7 @@ export function aStar(start, goal) {
 					lastPath.push(curr);
 					curr = curr.parent;
 				}
-				drawPath(drawOrder, lastPath);
-				console.log("Min path length: " + lastPath.length);
-				console.log("Counter: " + counter);
-				console.log("openSet length: " + openSet.length)
-				console.log("closedSet length: " + closedSet.length)
+				drawPath();
 				return;
 			}
 

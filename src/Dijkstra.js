@@ -26,8 +26,6 @@ export function dijkstra(start, goal) {
 		goal.distance = Number.MAX_SAFE_INTEGER;
 		start.distance = Number.MAX_SAFE_INTEGER;
 		start.visited = false;
-		console.log("NOW")
-		console.log(start, goal)
 		let counter = 0;
 		start.distance = 0;
 		let queue = new PriorityQueue({
@@ -45,8 +43,6 @@ export function dijkstra(start, goal) {
 					lastPath.push(cNode);
 					cNode = cNode.parent;
 				}
-				console.log("Min path length: " + lastPath.length);
-				console.log(drawOrder);
 				for (let i = 0, len = drawOrder.length; i < len; i++) {
 					drawOrder[i].visited = false;
 					grid[drawOrder[i].x][drawOrder[i].y].visited = false;
