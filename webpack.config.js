@@ -31,7 +31,9 @@ const config = {
 		]
 	},
 	plugins: [
-    new UglifyJsPlugin()
+    new UglifyJsPlugin({
+			exclude: /\/node_modules/
+		})
   ]
 }
 

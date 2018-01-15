@@ -145,14 +145,3 @@ export function dijkstra(start, goal) {
 //         queue.queue(tempNode);
 //     }
 // }
-
-
-// let visitedCounter = distanceCounter = 0
-// for(let i = 0; i < h; i++) {
-//     for(let j = 0; j < w; j++) {
-//         if(grid[i][j].visited)
-//             visitedCounter++;
-//         if(grid[i][j].distance != Number.MAX_VALUE)
-//             distanceCounter++;
-//         }
-// }

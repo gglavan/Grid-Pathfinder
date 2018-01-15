@@ -43,7 +43,7 @@ export function clearGrid() {
 	}
 	goal = start = undefined;
 	const toastElement = $('.toast').first()[0];
-	if (toastElement) toastElement.M_Toast.remove();;
+	if (toastElement) toastElement.M_Toast.remove();
 }
 
 export function isSameNode(nodeA, nodeB) {

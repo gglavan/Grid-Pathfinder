@@ -13,10 +13,12 @@ export const Color = {
 
 // Alert controller
 export const Alert = {
-	start: () => Materialize.toast(`Please set the start spot!`, 1500, 'red lighten-1'),
-	goal: () => Materialize.toast('Please set the finish spot!', 1500, 'red lighten-1'),
-	both: () => Materialize.toast('Please set the initial spots!', 1500, 'red lighten-1'),
-	notFound: () => Materialize.toast('Path not found!', 1500, 'red lighten-1'),
+	warning: '<i class="material-icons">error_outline</i>',
+	sad: '<i class="material-icons">sentiment_very_dissatisfied</i>',
+	start: () => Materialize.toast(`${Alert.warning} Pick the start spot, please`, 1500, 'red lighten-1'),
+	goal: () => Materialize.toast(`${Alert.warning} Pick the finish spot, please`, 1500, 'red lighten-1'),
+	both: () => Materialize.toast(`${Alert.warning} Pick the initial spots, please`, 1500, 'red lighten-1'),
+	notFound: () => Materialize.toast(`${Alert.sad} Sorry, the path could not be found...`, 1500, 'red lighten-1'),
 	pathInfo: (nodes, length, time) => Materialize.toast(`Visited nodes: ${nodes}\nPath length: ${length}\nTime: ${time}s`, 100000, 'green lighten-2')
 }
 
@@ -24,6 +26,7 @@ export const Alert = {
 export async function drawPath() {
 	if (lastPath.length) {
 		document.getElementById('generatePathBtn').classList.add('disabled');
+		document.getElementById('grid').classList.add('disabled-grid');
 		const t0 = performance.now();
 		for (let i = 0, len = drawOrder.length; i < len; i++) {
 			grid[drawOrder[i].x][drawOrder[i].y].el.style.backgroundColor = Color.visitedNode;
@@ -37,6 +40,7 @@ export async function drawPath() {
 		}
 		const t1 = performance.now();
 		document.getElementById('generatePathBtn').classList.remove('disabled');
+		document.getElementById('grid').classList.remove('disabled-grid');
 		let visitedNodes = 0;
 		for (let i = 0; i < h; i++) {
 			for (let j = 0; j < w; j++) {
@@ -75,6 +79,8 @@ function sleep(ms) {
 
 // Generate the desired amount of obstacles
 export function setObstacles() {
+	const toastElement = $('.toast').first()[0];
+	if (toastElement) toastElement.M_Toast.remove();;
 	const obst = 1000;
 	let arr = [];
 	let i = 0;
@@ -96,11 +102,11 @@ export function setObstacles() {
 	}
 }
 
-// Check if the obstacle is on path
-export function isOnPath(curr) {
-	for (let i = 0, len = lastPath.length; i < len; i++) {
-		if (isSameNode(lastPath[i], curr))
-			return true;
-	}
-	return false;
-}
+// // Check if the obstacle is on path
+// export function isOnPath(curr) {
+// 	for (let i = 0, len = lastPath.length; i < len; i++) {
+// 		if (isSameNode(lastPath[i], curr))
+// 			return true;
+// 	}
+// 	return false;
+// }
