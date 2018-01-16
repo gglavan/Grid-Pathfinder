@@ -36,6 +36,8 @@ gridElement.addEventListener('click', function (e) {
 			const coords = getCoords(rect.top, rect.left);
 			start = grid[coords.x][coords.y];
 			start.obstacle = false;
+		} else {
+			start = undefined;
 		}
 	} else if (document.getElementById('stop').checked == true) {
 		if (lastStop && lastStop.obstacle == false && lastStop.style.backgroundColor == Color.goal) {
@@ -52,6 +54,8 @@ gridElement.addEventListener('click', function (e) {
 			const coords = getCoords(rect.top, rect.left);
 			goal = grid[coords.x][coords.y];
 			goal.obstacle = false;
+		} else {
+			goal = undefined;
 		}
 	} else if (document.getElementById("obst").checked == true) {
 		let spot = e.target;
